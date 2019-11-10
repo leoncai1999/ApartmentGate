@@ -163,7 +163,6 @@
                 android:id="@+id/commuteTimeSpinner"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:prompt="15 min"
                 android:layout_weight="1"
                 android:layout_marginEnd="16dp"/>
 
@@ -282,7 +281,7 @@
                 android:id="@+id/budgetET"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:hint="Rent"
                 android:layout_weight="1"></EditText>
 
@@ -305,7 +304,7 @@
                 android:id="@+id/sizeET"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:hint="Size in Sqft"
                 android:layout_weight="1"></EditText>
 
@@ -326,6 +325,7 @@
                 android:layout_height="wrap_content"
                 android:text="Create Profile"
                 android:layout_marginEnd="16dp"
+                android:layout_marginBottom="20dp"
                 android:layout_weight="1"/>
 
             <View
