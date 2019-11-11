@@ -12,6 +12,12 @@ class WelcomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
+        signInButton.setOnClickListener {
+            // account validation needed here
+            val mainActivityIntent = Intent(this, MainActivity::class.java)
+            startActivity(mainActivityIntent)
+        }
+
         createAccountText.setOnClickListener {
             val createAccountIntent = Intent(this, CreateAccountActivity::class.java)
             startActivity(createAccountIntent)
