@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "127399185215",
+    "firebase_url": "https://apartmentgateprofiles.firebaseio.com",
+    "project_id": "apartmentgateprofiles",
+    "storage_bucket": "apartmentgateprofiles.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127399185215:android:53e06a2076f3bfff9c618a",
+        "android_client_info": {
+          "package_name": "com.cailihuang.apartmentgate"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "127399185215-n9gpin6eimuq7v53rdvfe7jsfamnoa2s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cailihuang.apartmentgate",
+            "certificate_hash": "818117f301543a3f9febd9f0a84f7acb958e2804"
+          }
+        },
+        {
+          "client_id": "127399185215-052g2uubeegq34nd17eb6oniu1dpa333.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "***REMOVED***"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "127399185215-052g2uubeegq34nd17eb6oniu1dpa333.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
