@@ -1,6 +1,7 @@
 package com.cailihuang.apartmentgate
 
 import android.app.Application
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +48,8 @@ class ListingAdapter(private val viewModel: ListViewModel)
 
             nameTextView.setOnClickListener {
                 // TODO one listing
+                val oneListingIntent = Intent(it.context, OneListingActivity::class.java)
+                it.context.startActivity(oneListingIntent)
             }
 
 //            favView.setOnClickListener{

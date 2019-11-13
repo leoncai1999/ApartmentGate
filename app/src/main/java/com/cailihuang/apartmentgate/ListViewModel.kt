@@ -20,6 +20,9 @@ class ListViewModel : ViewModel() {
     private val apartmentListings = MutableLiveData<List<ApartmentListing>>().apply {
         value = mutableListOf()
     }
+    private val workAddress = MutableLiveData<String>().apply {
+        value = "160 Spear St, San Francisco, CA"
+    }
 
     private fun fetchListings() = viewModelScope.launch(
         context = viewModelScope.coroutineContext
@@ -30,6 +33,14 @@ class ListViewModel : ViewModel() {
 
     fun observeListings(): LiveData<List<ApartmentListing>> {
         return apartmentListings
+    }
+
+    fun setWorkAddress(address: String) {
+        workAddress.value = address
+    }
+
+    fun getWorkAddress() : LiveData<String> {
+        return workAddress
     }
 
     fun refresh() {

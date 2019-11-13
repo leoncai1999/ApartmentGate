@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private fun initMapFragment() {
         supportFragmentManager
                 .beginTransaction()
-                .add(R.id.main_frame, MapFragment.newInstance())
+                .replace(R.id.main_frame, MapFragment.newInstance())
                 .commit()
     }
 

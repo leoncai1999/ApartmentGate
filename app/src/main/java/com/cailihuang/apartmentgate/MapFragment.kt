@@ -29,6 +29,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import java.util.*
 
 class MapFragment : Fragment(), OnMapReadyCallback {
@@ -73,29 +74,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val startLocation = LatLng(37.775453, -122.439660)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12.0f))
 
-        // TODO: Determine how many pins to plot at one time, and  resolve runtime issue
-        // "Cannot add the same observer with different lifecycles"
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[ListViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
 
-//        viewModel = activity?.run {
-//            ViewModelProviders.of(this)[ListViewModel::class.java]
-//        } ?: throw Exception("Invalid Activity")
-//
-//        viewModel.refresh()
+        viewModel.refresh()
 
-//        viewModel.observeListings().observe(this, Observer {
-//            for (apartment in it) {
-//                val address = geocoder.getFromLocationName(apartment.direccion, 1)
-//                map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-//                        .title(apartment.nombre))
-//            }
+        viewModel.observeListings().observe(this, Observer {
+            for (apartment in it) {
+                val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+                map.setInfoWindowAdapter(markerInfoWindow)
 
-//            for (i in 0..15) {
-//                val apartment = it[i]
-//                val address = geocoder.getFromLocationName(apartment.direccion, 1)
-//                map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-//                        .title(apartment.nombre))
-//            }
-//        })
+                val address = geocoder.getFromLocationName(apartment.direccion, 1)
+                val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
+                        .title(apartment.nombre).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                marker.tag = apartment
+                marker.showInfoWindow()
+
+            }
+
+            val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+        })
     }
 
 }

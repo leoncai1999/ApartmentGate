@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/apartmentName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apartment Name" />
+
+    <TextView
+        android:id="@+id/apartmentAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apartment Address" />
+
+    <ImageView
+        android:id="@+id/apartmentImage"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:srcCompat="@android:color/holo_purple" />
+
+    <TextView
+        android:id="@+id/commuteTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Estimated Commute Time : XX Min" />
+
+
+
+</LinearLayout>
