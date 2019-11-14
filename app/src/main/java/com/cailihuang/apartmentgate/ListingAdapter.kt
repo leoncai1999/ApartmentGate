@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
 
 
-class ListingAdapter(private val viewModel: ListViewModel)
+class ListingAdapter(/*private val viewModel: ListViewModel*/)
     : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
 
     class ApartmentDiff : DiffUtil.ItemCallback<ApartmentListing>() {
@@ -47,7 +47,6 @@ class ListingAdapter(private val viewModel: ListViewModel)
             bedTextView.text = item.beds
 
             nameTextView.setOnClickListener {
-
 
 //                val oneListingIntent = Intent(it.context, OneListingActivity::class.java)
 //                it.context.startActivity(oneListingIntent)

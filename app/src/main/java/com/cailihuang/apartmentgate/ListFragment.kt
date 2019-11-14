@@ -18,6 +18,13 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
+import com.cailihuang.apartmentgate.api.ApartmentListing
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
 
 class ListFragment: Fragment() {
     private lateinit var viewModel: ListViewModel
@@ -31,7 +38,8 @@ class ListFragment: Fragment() {
 
     private fun initAdapter(root: View) {
         val rv = root.findViewById<RecyclerView>(R.id.recyclerView)
-        listAdapter = ListingAdapter(viewModel)
+        //listAdapter = ListingAdapter(viewModel)
+        listAdapter = ListingAdapter()
         rv.adapter = listAdapter
         rv.layoutManager = LinearLayoutManager(context)
 
@@ -53,6 +61,24 @@ class ListFragment: Fragment() {
 
         initAdapter(root)
         viewModel.refresh()
+
+        val listings = arrayListOf<ApartmentListing>()
+        val ref = FirebaseDatabase.getInstance().getReference("apartment")
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                for (productSnapshot in dataSnapshot.children) {
+                    val listing = productSnapshot.getValue(ApartmentListing::class.java)
+                    listings.add(listing!!)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                throw databaseError.toException()
+            }
+        })
+
+
+        listAdapter.submitList(listings)
 
         return root
     }
