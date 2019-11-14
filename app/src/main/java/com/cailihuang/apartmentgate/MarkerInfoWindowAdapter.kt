@@ -17,10 +17,10 @@ class MarkerInfoWindowAdapter(val context: Context) : GoogleMap.InfoWindowAdapte
         infoView.minimumHeight = 500
         var infoWindow: ApartmentListing? = p0?.tag as ApartmentListing?
 
-        infoView.markerApartmentName.text = infoWindow?.nombre
-        infoView.markerApartmentAddress.text = infoWindow?.direccion
-        infoView.markerRent.text = infoWindow?.price
-        infoView.markerBeds.text = infoWindow?.beds
+        infoView.markerApartmentName.text = infoWindow?.name
+        infoView.markerApartmentAddress.text = infoWindow?.address
+        infoView.markerRent.text = infoWindow?.rent
+        infoView.markerBeds.text = infoWindow?.bds
 
         return infoView
     }

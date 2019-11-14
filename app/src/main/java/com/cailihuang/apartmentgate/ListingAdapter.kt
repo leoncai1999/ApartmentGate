@@ -19,13 +19,13 @@ class ListingAdapter(/*private val viewModel: ListViewModel*/)
     class ApartmentDiff : DiffUtil.ItemCallback<ApartmentListing>() {
 
         override fun areItemsTheSame(oldItem: ApartmentListing, newItem: ApartmentListing): Boolean {
-            return oldItem.direccion == newItem.direccion
+            return oldItem.address == newItem.address
         }
 
         override fun areContentsTheSame(oldItem: ApartmentListing, newItem: ApartmentListing): Boolean {
-            return oldItem.nombre == newItem.nombre
-                    && oldItem.beds == newItem.beds
-                    && oldItem.price == newItem.price
+            return oldItem.name == newItem.name
+                    && oldItem.bds == newItem.bds
+                    && oldItem.rent == newItem.rent
         }
     }
 
@@ -41,10 +41,10 @@ class ListingAdapter(/*private val viewModel: ListViewModel*/)
         fun bind(item: ApartmentListing?) {
             if (item == null) return
 
-            nameTextView.text = item.nombre
-            addressTextView.text = item.direccion
-            rentTextView.text = item.price
-            bedTextView.text = item.beds
+            nameTextView.text = item.name
+            addressTextView.text = item.address
+            rentTextView.text = item.rent
+            bedTextView.text = item.bds
 
             nameTextView.setOnClickListener {
 

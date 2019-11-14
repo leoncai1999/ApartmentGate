@@ -80,25 +80,25 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         viewModel.refresh()
 
-        viewModel.observeListings().observe(this, Observer {
-            var count = 0
-            for (apartment in it) {
-                if (count < 30) { // temporary solution
-                    val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
-                    map.setInfoWindowAdapter(markerInfoWindow)
-
-                    val address = geocoder.getFromLocationName(apartment.direccion, 1)
-                    val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-                            .title(apartment.nombre).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-                    marker.tag = apartment
-                    marker.showInfoWindow()
-                    count++
-                }
-            }
-
-            val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
-        })
+//        viewModel.observeListings().observe(this, Observer {
+//            var count = 0
+//            for (apartment in it) {
+//                if (count < 30) { // temporary solution
+//                    val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+//                    map.setInfoWindowAdapter(markerInfoWindow)
+//
+//                    val address = geocoder.getFromLocationName(apartment.address, 1)
+//                    val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
+//                            .title(apartment.name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+//                    marker.tag = apartment
+//                    marker.showInfoWindow()
+//                    count++
+//                }
+//            }
+//
+//            val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+//            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+//        })
     }
 
 }

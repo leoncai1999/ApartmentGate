@@ -39,13 +39,15 @@ class ListFragment: Fragment() {
     private fun initAdapter(root: View) {
         val rv = root.findViewById<RecyclerView>(R.id.recyclerView)
         //listAdapter = ListingAdapter(viewModel)
+
+        Log.d("INIT ADAPTER?"," --- WHAT UP")
         listAdapter = ListingAdapter()
         rv.adapter = listAdapter
         rv.layoutManager = LinearLayoutManager(context)
 
-        viewModel.observeListings().observe(this, Observer {
-            listAdapter.submitList(it)
-        })
+//        viewModel.observeListings().observe(this, Observer {
+//            listAdapter.submitList(it)
+//        })
     }
 
     override fun onCreateView(
@@ -53,32 +55,33 @@ class ListFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = activity?.run {
-            ViewModelProviders.of(this)[ListViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
+//        viewModel = activity?.run {
+//            ViewModelProviders.of(this)[ListViewModel::class.java]
+//        } ?: throw Exception("Invalid Activity")
 
         val root = inflater.inflate(R.layout.fragment_list, container, false)
 
         initAdapter(root)
-        viewModel.refresh()
+        //viewModel.refresh()
 
-        val listings = arrayListOf<ApartmentListing>()
-        val ref = FirebaseDatabase.getInstance().getReference("apartment")
+
+        val listings = mutableListOf<ApartmentListing>()
+        val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
+
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 for (productSnapshot in dataSnapshot.children) {
                     val listing = productSnapshot.getValue(ApartmentListing::class.java)
                     listings.add(listing!!)
                 }
+
+                listAdapter.submitList(listings)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 throw databaseError.toException()
             }
         })
-
-
-        listAdapter.submitList(listings)
 
         return root
     }
