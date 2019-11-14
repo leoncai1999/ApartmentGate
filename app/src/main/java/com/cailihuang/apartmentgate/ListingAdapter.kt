@@ -47,9 +47,10 @@ class ListingAdapter(private val viewModel: ListViewModel)
             bedTextView.text = item.beds
 
             nameTextView.setOnClickListener {
-                // TODO one listing
-                val oneListingIntent = Intent(it.context, OneListingActivity::class.java)
-                it.context.startActivity(oneListingIntent)
+
+
+//                val oneListingIntent = Intent(it.context, OneListingActivity::class.java)
+//                it.context.startActivity(oneListingIntent)
             }
 
 //            favView.setOnClickListener{

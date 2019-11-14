@@ -13,6 +13,8 @@ class MarkerInfoWindowAdapter(val context: Context) : GoogleMap.InfoWindowAdapte
     override fun getInfoContents(p0: Marker?): View {
 
         var infoView = (context as Activity).layoutInflater.inflate(R.layout.marker_listing, null)
+        infoView.minimumWidth = 750
+        infoView.minimumHeight = 500
         var infoWindow: ApartmentListing? = p0?.tag as ApartmentListing?
 
         infoView.markerApartmentName.text = infoWindow?.nombre
