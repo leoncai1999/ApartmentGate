@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
-import kotlin.coroutines.coroutineContext
 
 
 class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
@@ -47,7 +46,7 @@ class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(Apartmen
             bedTextView.text = item.bds
 
             nameTextView.setOnClickListener {
-                (it.context as MainActivity).setFragment(OneListingFragment.newInstance())
+                (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))
             }
 
 //            favView.setOnClickListener{

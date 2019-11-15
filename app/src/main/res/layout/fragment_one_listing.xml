@@ -8,26 +8,51 @@
         android:id="@+id/apartmentName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="20dp"
+        android:textStyle="bold"
         android:text="Apartment Name" />
 
     <TextView
         android:id="@+id/apartmentAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="16dp"
         android:text="Apartment Address" />
 
     <ImageView
         android:id="@+id/apartmentImage"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        app:srcCompat="@android:color/holo_purple" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="fitStart"
+        android:src="@drawable/no_image_available" />
 
     <TextView
-        android:id="@+id/commuteTime"
+        android:id="@+id/apartmentRent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Estimated Commute Time : XX Min" />
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="16dp"
+        android:text="Rent : $X,XXX/month" />
 
-
+    <TextView
+        android:id="@+id/apartmentBedrooms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textSize="16dp"
+        android:text="Bedrooms : 2" />
 
 </LinearLayout>

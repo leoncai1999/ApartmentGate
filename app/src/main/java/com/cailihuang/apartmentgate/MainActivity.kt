@@ -9,6 +9,10 @@ import com.cailihuang.apartmentgate.ListFragment
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        lateinit var jsonListings: String
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

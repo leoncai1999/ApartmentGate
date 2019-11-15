@@ -76,13 +76,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val startLocation = LatLng(37.775453, -122.439660)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12.0f))
 
-        map.setOnInfoWindowClickListener {
-            // the on click listener is applied to the whole marker dialog because there is no
-            // easy way to only have an on click listener for the get details button. We can look
-            // into a workaround or 3rd party library later to address this
-            (activity as MainActivity).setFragment(OneListingFragment.newInstance())
-        }
-
         viewModel = activity?.run {
             ViewModelProviders.of(this)[ListViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
@@ -103,6 +96,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         marker.tag = apartment
                         marker.showInfoWindow()
                         count++
+
+                        map.setOnInfoWindowClickListener {
+                            // the on click listener is applied to the whole marker dialog because there is no
+                            // easy way to only have an on click listener for the get details button. We can look
+                            // into a workaround or 3rd party library later to address this
+                            (activity as MainActivity).setFragment(OneListingFragment.newInstance(apartment))
+                        }
                     }
                 }
 
