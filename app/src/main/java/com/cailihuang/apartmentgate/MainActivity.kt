@@ -2,28 +2,23 @@ package com.cailihuang.apartmentgate
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.activity_main.*
 import com.cailihuang.apartmentgate.ListFragment
 
 class MainActivity : AppCompatActivity() {
 
-    // TODO change variable name
-    companion object {
-        lateinit var jsonListings: String
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initMapFragment()
-        initJson()
+        setFragment(MapFragment.newInstance())
 
         navigationView.setOnNavigationItemSelectedListener {item ->
             when (item.itemId) {
                 R.id.navigation_search -> {
                     println("search pressed")
-                    initMapFragment()
+                    setFragment(MapFragment.newInstance())
                     true
                 }
                 R.id.navigation_popular -> {
@@ -45,17 +40,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initMapFragment() {
+    fun setFragment(fragment: Fragment) {
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.main_frame, MapFragment.newInstance())
+                .replace(R.id.main_frame, fragment)
                 .commit()
     }
-
-    private fun initJson() {
-        jsonListings = assets.open("apartmentscom-sf.json").bufferedReader().use {
-            it.readText()
-        }
-    }
-
 }

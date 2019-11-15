@@ -17,7 +17,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.cailihuang.apartmentgate.api.ApartmentListing
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -38,16 +37,9 @@ class ListFragment: Fragment() {
 
     private fun initAdapter(root: View) {
         val rv = root.findViewById<RecyclerView>(R.id.recyclerView)
-        //listAdapter = ListingAdapter(viewModel)
-
-        Log.d("INIT ADAPTER?"," --- WHAT UP")
         listAdapter = ListingAdapter()
         rv.adapter = listAdapter
         rv.layoutManager = LinearLayoutManager(context)
-
-//        viewModel.observeListings().observe(this, Observer {
-//            listAdapter.submitList(it)
-//        })
     }
 
     override fun onCreateView(
@@ -63,7 +55,6 @@ class ListFragment: Fragment() {
 
         initAdapter(root)
         //viewModel.refresh()
-
 
         val listings = mutableListOf<ApartmentListing>()
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")

@@ -7,14 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.content.Context
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import kotlin.coroutines.coroutineContext
 
 
-class ListingAdapter(/*private val viewModel: ListViewModel*/)
-    : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
+class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
 
     class ApartmentDiff : DiffUtil.ItemCallback<ApartmentListing>() {
 
@@ -29,7 +30,6 @@ class ListingAdapter(/*private val viewModel: ListViewModel*/)
         }
     }
 
-    // ViewHolder pattern minimizes calls to findViewById
     inner class VH(itemView: View)
         : RecyclerView.ViewHolder(itemView) {
 
@@ -47,9 +47,7 @@ class ListingAdapter(/*private val viewModel: ListViewModel*/)
             bedTextView.text = item.bds
 
             nameTextView.setOnClickListener {
-
-//                val oneListingIntent = Intent(it.context, OneListingActivity::class.java)
-//                it.context.startActivity(oneListingIntent)
+                (it.context as MainActivity).setFragment(OneListingFragment.newInstance())
             }
 
 //            favView.setOnClickListener{
