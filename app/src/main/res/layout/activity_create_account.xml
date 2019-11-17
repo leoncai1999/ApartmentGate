@@ -49,40 +49,49 @@
             android:hint="Address Of Work"></EditText>
 
         <LinearLayout
-            android:orientation="horizontal" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:layout_marginTop="16dp">
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/workHoursText"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Work Hours"
                 android:layout_marginStart="16dp"
-                android:textSize="18sp"
-                android:layout_weight="0.5"/>
+                android:textSize="18sp"/>
 
-            <TimePicker
-                android:id="@+id/startTime"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_weight="0.5"
-                android:timePickerMode="spinner" />
-
-            <TextView
-                android:id="@+id/separatorText"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=" to "
-                android:textSize="18sp"
-                android:gravity="center"
-                android:layout_weight="0.5"/>
+                android:layout_height="wrap_content">
 
-            <TimePicker
-                android:id="@+id/endTime"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_weight="0.5"
-                android:timePickerMode="spinner" />
+                <TimePicker
+                    android:id="@+id/startTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:timePickerMode="spinner" />
+
+                <TextView
+                    android:id="@+id/separatorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text=" to "
+                    android:textSize="18sp"
+                    android:gravity="center"/>
+
+
+                <TimePicker
+                    android:id="@+id/endTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:timePickerMode="spinner" />
+
+            </LinearLayout>
+
 
         </LinearLayout>
 
