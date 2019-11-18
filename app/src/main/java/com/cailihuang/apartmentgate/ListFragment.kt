@@ -26,7 +26,7 @@ import com.google.firebase.database.ValueEventListener
 
 
 class ListFragment: Fragment() {
-    private lateinit var viewModel: ListViewModel
+    private lateinit var viewModel: MainViewModel
     private lateinit var listAdapter: ListingAdapter
 
     companion object {
@@ -48,7 +48,7 @@ class ListFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 //        viewModel = activity?.run {
-//            ViewModelProviders.of(this)[ListViewModel::class.java]
+//            ViewModelProviders.of(this)[MainViewModel::class.java]
 //        } ?: throw Exception("Invalid Activity")
 
         val root = inflater.inflate(R.layout.fragment_list, container, false)

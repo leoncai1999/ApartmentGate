@@ -46,9 +46,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private lateinit var viewModel: ListViewModel
+    private lateinit var viewModel: MainViewModel
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
+    private var listings = mutableListOf<ApartmentListing>()
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -77,7 +78,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12.0f))
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)[ListViewModel::class.java]
+            ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
@@ -87,6 +88,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 for (productSnapshot in dataSnapshot.children) {
                     if (count < 30) { // temporary solution
                         val apartment = productSnapshot.getValue(ApartmentListing::class.java)
+                        listings.add(apartment!!)
                         val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                         map.setInfoWindowAdapter(markerInfoWindow)
 
@@ -96,13 +98,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         marker.tag = apartment
                         marker.showInfoWindow()
                         count++
-
-                        map.setOnInfoWindowClickListener {
-                            // the on click listener is applied to the whole marker dialog because there is no
-                            // easy way to only have an on click listener for the get details button. We can look
-                            // into a workaround or 3rd party library later to address this
-                            (activity as MainActivity).setFragment(OneListingFragment.newInstance(apartment))
-                        }
                     }
                 }
 
@@ -114,6 +109,24 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 throw databaseError.toException()
             }
         })
+
+        map.setOnInfoWindowClickListener {
+            // the on click listener is applied to the whole marker dialog because there is no
+            // easy way to only have an on click listener for the get details button. We can look
+            // into a workaround or 3rd party library later to address this
+
+            // TODO: Query data instead of using helper function below for efficiency purposes
+            (activity as MainActivity).setFragment(OneListingFragment.newInstance(getListingFromTitle(it.title)))
+        }
+    }
+
+    private fun getListingFromTitle(title: String): ApartmentListing {
+        for (listing in listings) {
+            if (listing.name == title) {
+                return listing
+            }
+        }
+        return listings[0]
     }
 
 }
