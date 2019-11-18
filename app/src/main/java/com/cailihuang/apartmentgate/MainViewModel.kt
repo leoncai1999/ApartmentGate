@@ -43,12 +43,11 @@ class MainViewModel : ViewModel() {
         return workAddress
     }
 
-    fun fetchWalkScore() {
+    fun fetchWalkScore(address: String, lat: String, lon: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
                         + Dispatchers.IO) {
-            val callResponse = walkScoreRepository.getWalkScore("1119%8th%20Avenue%20Seattle%20WA%2098101", "47.6085",
-                    "-122.3295")
+            val callResponse = walkScoreRepository.getWalkScore(address, lat, lon)
             val response = callResponse.execute()
             if (response.isSuccessful) {
                 currentWalkScore.postValue(response.body())

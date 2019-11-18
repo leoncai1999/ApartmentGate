@@ -1,5 +1,6 @@
 package com.cailihuang.apartmentgate
 
+import android.location.Geocoder
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cailihuang.apartmentgate.api.ApartmentListing
 import kotlinx.android.synthetic.main.fragment_one_listing.*
+import java.net.URLEncoder
+import java.util.*
 
 class OneListingFragment : Fragment() {
 
@@ -25,6 +28,8 @@ class OneListingFragment : Fragment() {
         }
     }
 
+    private lateinit var geocoder: Geocoder
+
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -32,6 +37,7 @@ class OneListingFragment : Fragment() {
         viewModel = activity?.run {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+        geocoder = Geocoder(activity, Locale.getDefault())
 
         val rootView = inflater.inflate(R.layout.fragment_one_listing, container, false)
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
@@ -46,11 +52,18 @@ class OneListingFragment : Fragment() {
         apartmentBedroomsTV.text = "Bedrooms: " + listing!!.bds
 
         val apartmentWalkScoreTV = rootView.findViewById<TextView>(R.id.apartmentWalkScore)
+        val apartmentTransitScoreTV = rootView.findViewById<TextView>(R.id.apartmentTransitScore)
+        val apartmentBikeScoreTV = rootView.findViewById<TextView>(R.id.apartmentBikeScore)
 
-        viewModel.fetchWalkScore()
+        val coords = geocoder.getFromLocationName(listing!!.address, 1)
+
+        viewModel.fetchWalkScore(URLEncoder.encode(listing!!.address, "UTF-8"),
+                coords[0].latitude.toString(), coords[0].longitude.toString())
         viewModel.observeWalkScore().observe(this, Observer {
             // TODO: Must comply with branding requirements by linking to walkscore website
             apartmentWalkScoreTV.text = "Walk Score®: " + it.walkscore
+            apartmentTransitScoreTV.text = "Transit Score®: " + it.transit.score
+            apartmentBikeScoreTV.text = "Bike Score®: " + it.bike.score
         })
 
         return rootView

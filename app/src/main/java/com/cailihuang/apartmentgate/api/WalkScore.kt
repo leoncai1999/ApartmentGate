@@ -27,9 +27,9 @@ data class WalkScore (
         @field:SerializedName("snapped_lat")
         var snapped_lat: String = "",
         @field:SerializedName("snapped_lon")
-        var snapped_lon: String = ""
-//        @field:SerializedName("transit")
-//        var transit: TransitScore = TransitScore(),
-//        @field:SerializedName("bike")
-//        var bike: BikeScore = BikeScore()
+        var snapped_lon: String = "",
+        @field:SerializedName("transit")
+        var transit: TransitScore = TransitScore(),
+        @field:SerializedName("bike")
+        var bike: BikeScore = BikeScore()
 ): Parcelable
