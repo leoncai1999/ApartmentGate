@@ -24,6 +24,10 @@ class MainViewModel : ViewModel() {
     private val walkScoreRepository = WalkScoreRepository(walkScoreApi)
     private var currentWalkScore = MutableLiveData<WalkScore>()
 
+    private val howLoudApi = HowLoudApi.create()
+    private val howLoudRepository = HowLoudRepository(howLoudApi)
+    private var currentHowLoudScore = MutableLiveData<HowLoudScore>()
+
     private fun fetchListings() = viewModelScope.launch(
         context = viewModelScope.coroutineContext
                 + Dispatchers.IO) {
@@ -57,6 +61,22 @@ class MainViewModel : ViewModel() {
 
     fun observeWalkScore(): LiveData<WalkScore> {
         return currentWalkScore
+    }
+
+    fun fetchHowLoudScore(address: String) {
+        viewModelScope.launch(
+                context = viewModelScope.coroutineContext
+                        + Dispatchers.IO) {
+            val callResponse = howLoudRepository.getHowLoudScore(address)
+            val response = callResponse.execute()
+            if (response.isSuccessful) {
+                currentHowLoudScore.postValue(response.body()!!.result[0])
+            }
+        }
+    }
+
+    fun observeHowLoudScore(): LiveData<HowLoudScore> {
+        return currentHowLoudScore
     }
 
     fun refresh() {

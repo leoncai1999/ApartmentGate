@@ -54,6 +54,7 @@ class OneListingFragment : Fragment() {
         val apartmentWalkScoreTV = rootView.findViewById<TextView>(R.id.apartmentWalkScore)
         val apartmentTransitScoreTV = rootView.findViewById<TextView>(R.id.apartmentTransitScore)
         val apartmentBikeScoreTV = rootView.findViewById<TextView>(R.id.apartmentBikeScore)
+        val apartmentSoundScoreTV = rootView.findViewById<TextView>(R.id.apartmentSoundScore)
 
         val coords = geocoder.getFromLocationName(listing!!.address, 1)
 
@@ -64,6 +65,11 @@ class OneListingFragment : Fragment() {
             apartmentWalkScoreTV.text = "Walk Score®: " + it.walkscore
             apartmentTransitScoreTV.text = "Transit Score®: " + it.transit.score
             apartmentBikeScoreTV.text = "Bike Score®: " + it.bike.score
+        })
+
+        viewModel.fetchHowLoudScore(URLEncoder.encode(listing!!.address, "UTF-8"))
+        viewModel.observeHowLoudScore().observe(this, Observer {
+            apartmentSoundScoreTV.text = "Sound Score®: " + it.score
         })
 
         return rootView
