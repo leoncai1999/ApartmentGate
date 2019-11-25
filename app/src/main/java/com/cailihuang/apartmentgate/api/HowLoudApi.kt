@@ -10,12 +10,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface WalkScoreApi {
+interface HowLoudApi {
 
-    // TODO: Get the API working for TransitScore
-    @GET("/score?format=json&transit=1&bike=1")
-    fun getWalkScore(@Query("address") address: String, @Query("lat") lat:
-    String, @Query("lon") lon: String, @Query("wsapikey") key: String): Call<WalkScore>
+    @GET("/address?")
+    fun getHowLoudScore(@Query("address") address: String, @Query("key")
+    key: String): Call<HowLoudQuery>
+
+    class HowLoudQuery(
+            val status: String?,
+            val request: HowLoudRequest,
+            val result: List<HowLoudScore>)
+
+    data class HowLoudRequest(val latitude: Double, val key: String, val longitude: Double)
 
     companion object {
         private fun buildGsonConverterFactory(): GsonConverterFactory {
@@ -24,10 +30,10 @@ interface WalkScoreApi {
         }
         var httpurl = HttpUrl.Builder()
                 .scheme("http")
-                .host("api.walkscore.com")
+                .host("elb1.howloud.com")
                 .build()
-        fun create(): WalkScoreApi = create(httpurl)
-        private fun create(httpUrl: HttpUrl): WalkScoreApi {
+        fun create(): HowLoudApi = create(httpurl)
+        private fun create(httpUrl: HttpUrl): HowLoudApi {
 
             val client = OkHttpClient.Builder()
                     .addInterceptor(HttpLoggingInterceptor().apply {
@@ -39,7 +45,8 @@ interface WalkScoreApi {
                     .client(client)
                     .addConverterFactory(buildGsonConverterFactory())
                     .build()
-                    .create(WalkScoreApi::class.java)
+                    .create(HowLoudApi::class.java)
         }
     }
+
 }

@@ -20,7 +20,7 @@ class WelcomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_welcome)
 
         signInButton.setOnClickListener {
-            // account validation needed here
+            // TODO verify input not null, hide password
 
             var fbAuth = FirebaseAuth.getInstance()
 
@@ -28,8 +28,7 @@ class WelcomeActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val mainActivityIntent = Intent(this, MainActivity::class.java)
                     startActivity(mainActivityIntent)
-
-                } else{
+                } else {
                     Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
                 }
             })

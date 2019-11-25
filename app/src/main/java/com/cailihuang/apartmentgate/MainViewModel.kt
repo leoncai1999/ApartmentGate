@@ -24,6 +24,15 @@ class MainViewModel : ViewModel() {
     private val walkScoreRepository = WalkScoreRepository(walkScoreApi)
     private var currentWalkScore = MutableLiveData<WalkScore>()
 
+    private val howLoudApi = HowLoudApi.create()
+    private val howLoudRepository = HowLoudRepository(howLoudApi)
+    private var currentHowLoudScore = MutableLiveData<HowLoudScore>()
+
+    private val directionsApi = DirectionsApi.create()
+    private val directionsRepository = DirectionsRepository(directionsApi)
+    private var currentCommuteTime = MutableLiveData<String>()
+    private var currentOverviewPolyline = MutableLiveData<String>()
+
     private fun fetchListings() = viewModelScope.launch(
         context = viewModelScope.coroutineContext
                 + Dispatchers.IO) {
@@ -43,11 +52,11 @@ class MainViewModel : ViewModel() {
         return workAddress
     }
 
-    fun fetchWalkScore(address: String, lat: String, lon: String) {
+    fun fetchWalkScore(address: String, lat: String, lon: String, key: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
                         + Dispatchers.IO) {
-            val callResponse = walkScoreRepository.getWalkScore(address, lat, lon)
+            val callResponse = walkScoreRepository.getWalkScore(address, lat, lon, key)
             val response = callResponse.execute()
             if (response.isSuccessful) {
                 currentWalkScore.postValue(response.body())
@@ -57,6 +66,43 @@ class MainViewModel : ViewModel() {
 
     fun observeWalkScore(): LiveData<WalkScore> {
         return currentWalkScore
+    }
+
+    fun fetchHowLoudScore(address: String, key: String) {
+        viewModelScope.launch(
+                context = viewModelScope.coroutineContext
+                        + Dispatchers.IO) {
+            val callResponse = howLoudRepository.getHowLoudScore(address, key)
+            val response = callResponse.execute()
+            if (response.isSuccessful) {
+                currentHowLoudScore.postValue(response.body()!!.result[0])
+            }
+        }
+    }
+
+    fun observeHowLoudScore(): LiveData<HowLoudScore> {
+        return currentHowLoudScore
+    }
+
+    fun fetchDirections(origin: String, destination: String, key: String) {
+        viewModelScope.launch(
+                context = viewModelScope.coroutineContext
+                        + Dispatchers.IO) {
+            val callResponse = directionsRepository.getDirections(origin, destination, key)
+            val response = callResponse.execute()
+            if (response.isSuccessful) {
+                currentCommuteTime.postValue(response.body()!!.routes[0].legs[0].duration.text)
+                currentOverviewPolyline.postValue(response.body()!!.routes[0].overview_polyline.points)
+            }
+        }
+    }
+
+    fun observeCommuteTime(): LiveData<String> {
+        return currentCommuteTime
+    }
+
+    fun observeOverviewPolyline(): LiveData<String> {
+        return currentOverviewPolyline
     }
 
     fun refresh() {
