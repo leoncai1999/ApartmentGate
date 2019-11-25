@@ -12,10 +12,9 @@ import retrofit2.http.Query
 
 interface HowLoudApi {
 
-    // TODO: Change the WSApiKey to a parameter and establish practice for hiding api key
-    // Note: to get this to work, you must put in the api key below
-    @GET("/address?key=")
-    fun getHowLoudScore(@Query("address") address: String): Call<HowLoudQuery>
+    @GET("/address?")
+    fun getHowLoudScore(@Query("address") address: String, @Query("key")
+    key: String): Call<HowLoudQuery>
 
     class HowLoudQuery(
             val status: String?,

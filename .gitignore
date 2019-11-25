@@ -13,3 +13,4 @@
 .externalNativeBuild
 .cxx
 /app/src/main/res/values/google_maps_api.xml
+/app/src/main/java/com/cailihuang/apartmentgate/APIKeys.kt
