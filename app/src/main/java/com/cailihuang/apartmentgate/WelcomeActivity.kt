@@ -24,14 +24,14 @@ class WelcomeActivity : AppCompatActivity() {
 
             var fbAuth = FirebaseAuth.getInstance()
 
-            fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
-                if (task.isSuccessful) {
+//            fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
+//                if (task.isSuccessful) {
                     val mainActivityIntent = Intent(this, MainActivity::class.java)
                     startActivity(mainActivityIntent)
-                } else {
-                    Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
-                }
-            })
+//                } else {
+//                    Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
+//                }
+//            })
         }
 
 

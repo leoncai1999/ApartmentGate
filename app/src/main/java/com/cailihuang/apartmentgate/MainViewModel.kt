@@ -8,6 +8,8 @@ import com.cailihuang.apartmentgate.api.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.security.AlgorithmParameterGenerator
+import java.util.concurrent.Semaphore
+
 
 
 class MainViewModel : ViewModel() {
@@ -17,6 +19,7 @@ class MainViewModel : ViewModel() {
     private val apartmentListings = MutableLiveData<List<ApartmentListing>>().apply {
         value = mutableListOf()
     }
+
     private val workAddress = MutableLiveData<String>().apply {
         value = "160 Spear St, San Francisco, CA"
     }
@@ -32,6 +35,7 @@ class MainViewModel : ViewModel() {
     private val directionsRepository = DirectionsRepository(directionsApi)
     private var currentCommuteTime = MutableLiveData<String>()
     private var currentOverviewPolyline = MutableLiveData<String>()
+
 
     private fun fetchListings() = viewModelScope.launch(
         context = viewModelScope.coroutineContext
@@ -105,6 +109,7 @@ class MainViewModel : ViewModel() {
         return currentOverviewPolyline
     }
 
+    // to be used for filtering, sorting
     fun refresh() {
         fetchListings()
     }

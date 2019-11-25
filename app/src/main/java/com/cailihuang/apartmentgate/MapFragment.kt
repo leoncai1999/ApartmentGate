@@ -34,9 +34,20 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
+import androidx.lifecycle.viewModelScope
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import com.cailihuang.apartmentgate.api.CommuteTimeApi
+import com.cailihuang.apartmentgate.api.CommuteTimeRepository
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.Semaphore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+
+import androidx.lifecycle.*
+
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -85,24 +96,50 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var count = 0
+
+                val commuteTimeApi = CommuteTimeApi.create()
+                val commuteTimeRepository = CommuteTimeRepository(commuteTimeApi)
+                val job = Job()
+                val uiScope = CoroutineScope(Dispatchers.Main + job)
+
+                var commuteTime = 0
+                val commuteListingSema = Semaphore(1)
+
                 for (productSnapshot in dataSnapshot.children) {
-                    if (count < 30) { // temporary solution
+                    if (count < 10) { // temporary solution
                         val apartment = productSnapshot.getValue(ApartmentListing::class.java)
                         listings.add(apartment!!)
                         val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                         map.setInfoWindowAdapter(markerInfoWindow)
 
-                        val address = geocoder.getFromLocationName(apartment!!.address, 1)
-                        val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-                                .title(apartment.name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-                        marker.tag = apartment
-                        marker.showInfoWindow()
+                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
+                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+
+                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
+                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
+
+                        commuteListingSema.acquire()
+
+                        uiScope.launch(
+                            context = uiScope.coroutineContext
+                                    + Dispatchers.IO) {
+                            // Update LiveData from IO dispatcher, use postValue
+
+                            commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+                            commuteListingSema.release()
+                        }
+
+                        commuteListingSema.acquire()
+                        commuteListingSema.release()
+
+                        Log.d("COMMUTE TIME", "count is $count --- commute time $commuteTime")
+
                         count++
                     }
                 }
 
-                val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-                map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+                //val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+                //map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -118,6 +155,17 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             // TODO: Query data instead of using helper function below for efficiency purposes
             (activity as MainActivity).setFragment(OneListingFragment.newInstance(getListingFromTitle(it.title)))
         }
+    }
+
+    private fun googleMapifyAddress() {
+
+    }
+
+    // possibly used to refactor code
+    private fun getCommuteTime() {
+
+        //viewModel.refreshCommuteTime()
+
     }
 
     private fun getListingFromTitle(title: String): ApartmentListing {
