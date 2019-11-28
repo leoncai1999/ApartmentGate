@@ -20,6 +20,9 @@ import android.graphics.Typeface
 import androidx.core.view.ViewCompat
 import androidx.core.content.ContextCompat
 import android.widget.Button
+import kotlinx.android.synthetic.main.user_profile_information.*
+
+// TODO potentially add nickname
 
 
 class CreateAccountActivity : AppCompatActivity() {
@@ -151,15 +154,16 @@ class CreateAccountActivity : AppCompatActivity() {
 
                 currentUserDb.child("email").setValue(newEmailET.text.toString())
                 currentUserDb.child("workAddress").setValue(addressET.text.toString())
-                currentUserDb.child("workStart").setValue(startTime.hour.toString() + ":" + startTime.minute.toString())
-                currentUserDb.child("workEnd").setValue(endTime.hour.toString() + ":" + endTime.minute.toString())
-                currentUserDb.child("workAddress").setValue(addressET.text.toString())
+                currentUserDb.child("workStartHour").setValue(startTime.hour)
+                currentUserDb.child("workStartMin").setValue(startTime.minute)
+                currentUserDb.child("workEndHour").setValue(endTime.hour)
+                currentUserDb.child("workEndMin").setValue(endTime.minute)
                 currentUserDb.child("transportation").setValue(preferredTransport)
-                currentUserDb.child("maxCommuteTime").setValue(commuteTimeSpinner.selectedItem.toString())
+                currentUserDb.child("maxCommuteTime").setValue(commuteTimeSpinner.selectedItem)
                 currentUserDb.child("demographic").setValue(demographic)
                 currentUserDb.child("walkability").setValue(walkability)
-                currentUserDb.child("budget").setValue(budgetET.text.toString())
-                currentUserDb.child("size").setValue(sizeET.text.toString())
+                currentUserDb.child("budget").setValue(Integer.parseInt(budgetET.text.toString()))
+                currentUserDb.child("size").setValue(Integer.parseInt(sizeET.text.toString()))
 
             } else {
                 // password must be a certain mystery length long, probably eight

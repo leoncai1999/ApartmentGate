@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_profile -> {
                     println("profile pressed")
+                    setFragment(ProfileFragment.newInstance())
                     true
                 }
                 else -> {

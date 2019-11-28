@@ -107,8 +107,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 val commuteTimeApi = CommuteTimeApi.create()
                 val commuteTimeRepository = CommuteTimeRepository(commuteTimeApi)
-                val job = Job()
-                val uiScope = CoroutineScope(Dispatchers.Main + job)
+                //val job =
+                val uiScope = CoroutineScope(Dispatchers.Main + Job())
 
                 var commuteTime = CommuteTimeInfo()
                 val commuteListingSema = Semaphore(1)
