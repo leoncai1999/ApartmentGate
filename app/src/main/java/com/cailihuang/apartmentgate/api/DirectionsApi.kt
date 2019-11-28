@@ -12,9 +12,9 @@ import retrofit2.http.Query
 
 interface DirectionsApi {
 
-    @GET("/maps/api/directions/json?&sensor=false&mode=driving&key=***REMOVED***")
+    @GET("/maps/api/directions/json?&sensor=false")
     fun getDirections(@Query("origin") origin: String, @Query("destination")
-    destination: String, @Query("key") key: String): Call<DirectionsQuery>
+    destination: String, @Query("mode") mode: String, @Query("key") key: String): Call<DirectionsQuery>
 
     class DirectionsQuery (
             val geocoded_waypoints : List<Geocoded_waypoints>,
@@ -31,6 +31,7 @@ interface DirectionsApi {
     data class Routes (
             val bounds : Bounds,
             val copyrights : String,
+            val fare : Fare,
             val legs : List<Legs>,
             val overview_polyline : Overview_polyline,
             val summary : String,
@@ -54,6 +55,8 @@ interface DirectionsApi {
     )
 
     data class Legs (
+            val arrival_time : Arrival_time,
+            val departure_time : Departure_time,
             val distance : Distance,
             val duration : Duration,
             val end_address : String,
@@ -92,6 +95,7 @@ interface DirectionsApi {
             val html_instructions : String,
             val polyline : Polyline,
             val start_location : Start_location,
+            val steps : List<Steps>,
             val travel_mode : String
     )
 
@@ -101,6 +105,24 @@ interface DirectionsApi {
 
     data class Overview_polyline (
             val points : String
+    )
+
+    data class Arrival_time (
+            val text : String,
+            val time_zone : String,
+            val value : Int
+    )
+
+    data class Departure_time (
+            val text : String,
+            val time_zone : String,
+            val value : Int
+    )
+
+    data class Fare (
+            val currency : String,
+            val text : String,
+            val value : Double
     )
 
     companion object {

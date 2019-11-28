@@ -6,11 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import com.cailihuang.apartmentgate.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -50,6 +52,11 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         rootView = inflater.inflate(R.layout.fragment_one_listing, container, false)
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
 
+        val backButton = rootView.findViewById<TextView>(R.id.backButton)
+        backButton.setOnClickListener {
+            fragmentManager!!.popBackStack()
+        }
+
         val apartmentNameTV = rootView.findViewById<TextView>(R.id.apartmentName)
         apartmentNameTV.text = listing!!.name
         val apartmentAddressTV = rootView.findViewById<TextView>(R.id.apartmentAddress)
@@ -58,6 +65,15 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         apartmentRentTV.text = "Rent: " + listing!!.rent + "/month"
         val apartmentBedroomsTV = rootView.findViewById<TextView>(R.id.apartmentBedrooms)
         apartmentBedroomsTV.text = "Bedrooms: " + listing!!.bds
+
+        val apartmentAddress = geocoder.getFromLocationName(listing!!.address, 1)
+        val apartmentImage = rootView.findViewById<ImageView>(R.id.apartmentImage)
+        val imageURL = "https://maps.googleapis.com/maps/api/streetview?size=600x300&location="
+                .plus(apartmentAddress[0].latitude.toString()).plus(",%20")
+                .plus(apartmentAddress[0].longitude.toString())
+                .plus("&fov=100&heading=70&pitch=0&key=")
+                .plus(APIKeys.googleMapsAPIKey)
+        Glide.glideFetch(imageURL, apartmentImage)
 
         val apartmentWalkScoreTV = rootView.findViewById<TextView>(R.id.apartmentWalkScore)
         val apartmentTransitScoreTV = rootView.findViewById<TextView>(R.id.apartmentTransitScore)
@@ -75,7 +91,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             apartmentBikeScoreTV.text = "Bike Score®: " + it.bike.score
         })
 
-        viewModel.fetchHowLoudScore(URLEncoder.encode(listing!!.address, "UTF-8"), APIKeys.sondscoreAPIKey)
+        viewModel.fetchHowLoudScore(URLEncoder.encode(listing!!.address, "UTF-8"), APIKeys.soundscoreAPIKey)
         viewModel.observeHowLoudScore().observe(this, Observer {
             apartmentSoundScoreTV.text = "Sound Score®: " + it.score
         })
@@ -101,7 +117,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
         val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
-        viewModel.fetchDirections(origin, destination, APIKeys.googleMapsAPIKey)
+        viewModel.fetchDirections(origin, destination, "transit", APIKeys.googleMapsAPIKey)
 
         val apartmentCommuteTimeTV = rootView.findViewById<TextView>(R.id.apartmentCommuteTime)
 

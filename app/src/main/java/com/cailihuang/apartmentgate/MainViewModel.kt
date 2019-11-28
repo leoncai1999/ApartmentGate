@@ -90,11 +90,11 @@ class MainViewModel : ViewModel() {
         return currentHowLoudScore
     }
 
-    fun fetchDirections(origin: String, destination: String, key: String) {
+    fun fetchDirections(origin: String, destination: String, mode: String, key: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
                         + Dispatchers.IO) {
-            val callResponse = directionsRepository.getDirections(origin, destination, key)
+            val callResponse = directionsRepository.getDirections(origin, destination, mode, key)
             val response = callResponse.execute()
             if (response.isSuccessful) {
                 currentCommuteTime.postValue(response.body()!!.routes[0].legs[0].duration.text)
