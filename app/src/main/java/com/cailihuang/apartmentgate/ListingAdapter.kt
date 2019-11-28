@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
 
 
-class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
+class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
 
     class ApartmentDiff : DiffUtil.ItemCallback<ApartmentListing>() {
 
@@ -36,6 +36,7 @@ class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(Apartmen
         var addressTextView = itemView.findViewById<TextView>(R.id.addressTV)
         var rentTextView = itemView.findViewById<TextView>(R.id.rentTV)
         var bedTextView = itemView.findViewById<TextView>(R.id.bedTV)
+        var commuteTextView = itemView.findViewById<TextView>(R.id.commuteTimeTV)
 
         fun bind(item: ApartmentListing?) {
             if (item == null) return
@@ -44,11 +45,13 @@ class ListingAdapter : ListAdapter<ApartmentListing, ListingAdapter.VH>(Apartmen
             addressTextView.text = item.address
             rentTextView.text = item.rent
             bedTextView.text = item.bds
+            commuteTextView.text = viewModel.commuteTimes.get(item.address)?.text
 
             nameTextView.setOnClickListener {
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))
             }
 
+            // favorites
 //            favView.setOnClickListener{
 //                val position = adapterPosition
 //                // Toggle Favorite

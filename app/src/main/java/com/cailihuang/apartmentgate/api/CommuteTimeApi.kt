@@ -1,7 +1,5 @@
 package com.cailihuang.apartmentgate.api
 
-import com.cailihuang.apartmentgate.APIKeys
-import com.google.gson.GsonBuilder
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,13 +18,17 @@ interface CommuteTimeApi {
         @Query("destinations") wordAddress: String,
         @Query("key") APIkey: String): CommuteResponse
 
-    data class CommuteResponse(val rows: List<CommuteRows>)
+    data class CommuteResponse(
+        val rows: List<CommuteRows>//,
+        //val status: String
+        // status used for debugging API response
+    )
 
     class CommuteRows(
         val elements: List<CommuteElementsResponse>
     )
 
-    data class CommuteElementsResponse(val duration: CommuteDistance)
+    data class CommuteElementsResponse(val duration: CommuteTimeInfo)
 
     companion object {
         var httpurl = HttpUrl.Builder()

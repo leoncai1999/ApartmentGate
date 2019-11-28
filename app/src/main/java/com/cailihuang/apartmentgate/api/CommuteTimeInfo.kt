@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class CommuteDistance (
+data class CommuteTimeInfo (
     @field:SerializedName("value")
     var value: Int = 0,
     @field:SerializedName("text")

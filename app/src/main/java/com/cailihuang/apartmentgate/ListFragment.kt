@@ -23,6 +23,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.cailihuang.apartmentgate.MapFragment
+
 
 
 class ListFragment: Fragment() {
@@ -37,7 +39,9 @@ class ListFragment: Fragment() {
 
     private fun initAdapter(root: View) {
         val rv = root.findViewById<RecyclerView>(R.id.recyclerView)
-        listAdapter = ListingAdapter()
+        //val parentMapFrag = parentFragment
+        //viewModel = (parentFragment as MapFragment).getMapViewModel()
+        listAdapter = ListingAdapter(viewModel)
         rv.adapter = listAdapter
         rv.layoutManager = LinearLayoutManager(context)
     }
@@ -47,9 +51,9 @@ class ListFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        viewModel = activity?.run {
-//            ViewModelProviders.of(this)[MainViewModel::class.java]
-//        } ?: throw Exception("Invalid Activity")
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[MainViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
 
         val root = inflater.inflate(R.layout.fragment_list, container, false)
 

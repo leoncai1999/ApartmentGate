@@ -20,6 +20,8 @@ class MainViewModel : ViewModel() {
         value = mutableListOf()
     }
 
+    val commuteTimes = mutableMapOf<String, CommuteTimeInfo>()
+
     private val workAddress = MutableLiveData<String>().apply {
         value = "160 Spear St, San Francisco, CA"
     }

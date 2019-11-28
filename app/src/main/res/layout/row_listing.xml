@@ -46,8 +46,6 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/addressTV"
                 android:layout_margin="2dp"
-                android:lines="6"
-                android:ellipsize="end"
                 android:textSize="12sp"
                 android:padding="10dp"
                 />
@@ -79,7 +77,6 @@
                     android:layout_margin="12dp"
                     android:gravity="center"
                     />
-
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -110,6 +107,35 @@
                 android:src="@drawable/ic_directions_car_black_24dp"
                 />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="2dp"
+            app:layout_constraintTop_toBottomOf="@+id/statsLayout"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/commuteTimeLabelTV"
+                android:text="Commute time:"
+                android:textSize="12sp"
+                android:padding="10dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/commuteTimeTV"
+                android:textSize="12sp"
+                android:padding="10dp"
+                />
+
+        </LinearLayout>
+
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

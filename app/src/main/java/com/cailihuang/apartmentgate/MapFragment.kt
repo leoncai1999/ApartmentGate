@@ -37,6 +37,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.cailihuang.apartmentgate.api.ApartmentListing
 import com.cailihuang.apartmentgate.api.CommuteTimeApi
+import com.cailihuang.apartmentgate.api.CommuteTimeInfo
 import com.cailihuang.apartmentgate.api.CommuteTimeRepository
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import kotlinx.coroutines.Dispatchers
@@ -46,8 +47,8 @@ import java.util.concurrent.Semaphore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
-import androidx.lifecycle.*
-
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -61,6 +62,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
     private var listings = mutableListOf<ApartmentListing>()
+
+    // Right now, all of the commute times must be retrieved before you launch the list
+    private val gotCommuteTimesSema = Semaphore(1)
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -77,12 +81,16 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         listButton.setOnClickListener {
+            gotCommuteTimesSema.acquire()
+
             (activity as MainActivity).setFragment(ListFragment.newInstance())
         }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+
+        gotCommuteTimesSema.acquire()
 
         // start map at center of San Francisco
         val startLocation = LatLng(37.775453, -122.439660)
@@ -102,21 +110,21 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 val job = Job()
                 val uiScope = CoroutineScope(Dispatchers.Main + job)
 
-                var commuteTime = 0
+                var commuteTime = CommuteTimeInfo()
                 val commuteListingSema = Semaphore(1)
 
                 for (productSnapshot in dataSnapshot.children) {
-                    if (count < 10) { // temporary solution
+                    if (count < 5) { // temporary solution
                         val apartment = productSnapshot.getValue(ApartmentListing::class.java)
                         listings.add(apartment!!)
                         val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                         map.setInfoWindowAdapter(markerInfoWindow)
 
-                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
-                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+//                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
+//                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
 
-                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
-                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
+//                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
+//                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
 
                         commuteListingSema.acquire()
 
@@ -125,14 +133,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                     + Dispatchers.IO) {
                             // Update LiveData from IO dispatcher, use postValue
 
-                            commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+
+                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
                             commuteListingSema.release()
                         }
 
                         commuteListingSema.acquire()
                         commuteListingSema.release()
 
-                        Log.d("COMMUTE TIME", "count is $count --- commute time $commuteTime")
+                        Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
+
+                        viewModel.commuteTimes.put(apartment.address, commuteTime)
 
                         count++
                     }
@@ -140,6 +152,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 //val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
                 //map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+
+                gotCommuteTimesSema.release()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -157,6 +171,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    // keeping around in case grpc is still a dud
     private fun googleMapifyAddress() {
 
     }
