@@ -96,6 +96,7 @@ interface DirectionsApi {
             val polyline : Polyline,
             val start_location : Start_location,
             val steps : List<Steps>,
+            val transit_details : Transit_details,
             val travel_mode : String
     )
 
@@ -123,6 +124,52 @@ interface DirectionsApi {
             val currency : String,
             val text : String,
             val value : Double
+    )
+
+    data class Transit_details (
+            val arrival_stop : Arrival_stop,
+            val arrival_time : Arrival_time,
+            val departure_stop : Departure_stop,
+            val departure_time : Departure_time,
+            val headsign : String,
+            val line : Line,
+            val num_stops : Int
+    )
+
+    data class Arrival_stop (
+            val location : Location,
+            val name : String
+    )
+
+    data class Departure_stop (
+            val location : Location,
+            val name : String
+    )
+
+    data class Line (
+            val agencies : List<Agencies>,
+            val color : String,
+            val icon : String,
+            val name : String,
+            val short_name : String,
+            val url : String,
+            val vehicle : Vehicle
+    )
+
+    data class Agencies (
+            val name : String,
+            val url : String
+    )
+
+    data class Location (
+            val lat : Double,
+            val lng : Double
+    )
+
+    data class Vehicle (
+            val icon : String,
+            val name : String,
+            val type : String
     )
 
     companion object {

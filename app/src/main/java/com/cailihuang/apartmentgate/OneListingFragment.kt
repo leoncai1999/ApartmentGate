@@ -11,9 +11,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import com.cailihuang.apartmentgate.api.DirectionsApi
 import com.cailihuang.apartmentgate.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -23,6 +25,9 @@ import com.google.android.gms.maps.model.*
 import java.net.URLEncoder
 import java.util.*
 import kotlin.collections.ArrayList
+import com.google.android.gms.maps.model.Gap
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Dot
 
 class OneListingFragment : Fragment(), OnMapReadyCallback {
 
@@ -31,6 +36,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var rootView: View
     private lateinit var directionsAdapter: DirectionsListAdapter
+    private val mode = "transit"
 
     companion object {
         fun newInstance(listing: ApartmentListing): OneListingFragment {
@@ -46,7 +52,8 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val rv = root.findViewById<RecyclerView>(R.id.directionsRV)
         directionsAdapter = DirectionsListAdapter(viewModel)
         rv.adapter = directionsAdapter
-        rv.layoutManager = LinearLayoutManager(context) // check this
+        rv.layoutManager = LinearLayoutManager(context)
+        rv.addItemDecoration(DividerItemDecoration(rv.getContext(), DividerItemDecoration.VERTICAL))
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -127,7 +134,8 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
         val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
-        viewModel.fetchDirections(origin, destination, "transit", APIKeys.googleMapsAPIKey)
+        // TODO: Pass in user's desired mode of transit
+        viewModel.fetchDirections(origin, destination, mode, APIKeys.googleMapsAPIKey)
 
         val apartmentCommuteTimeTV = rootView.findViewById<TextView>(R.id.apartmentCommuteTime)
         val apartmentCommuteFareTV = rootView.findViewById<TextView>(R.id.apartmentCommuteFare)
@@ -143,7 +151,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         viewModel.observeDirections().observe(this, Observer {
             map.clear()
             for (i in 0 until it.size) {
-                drawPoly(it[i].polyline.points, it[i].travel_mode)
+                drawPoly(it[i])
             }
             map.addMarker(MarkerOptions().position(apartmentCoords)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
@@ -157,15 +165,25 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun drawPoly(polyline: String, mode: String) {
+    private fun drawPoly(steps: DirectionsApi.Steps) {
         var points = ArrayList<LatLng>()
         lateinit var lineOptions: PolylineOptions
-        if (mode == "TRANSIT") {
-            lineOptions = PolylineOptions().color(Color.GREEN).width(10f)
+        if (steps.travel_mode == "TRANSIT") {
+            val lineColor = steps.transit_details.line.color
+            if (lineColor != null) {
+                // Light rail and Subway lines have special route colors
+                lineOptions = PolylineOptions().color(Color.parseColor(lineColor)).width(10f)
+            } else {
+                lineOptions = PolylineOptions().color(Color.CYAN).width(10f)
+            }
+        } else if  (steps.travel_mode == "WALKING") {
+            val pattern = Arrays.asList(Dot(), Gap(20f), Dash(30f), Gap(20f))
+            lineOptions = PolylineOptions().color(Color.BLUE).pattern(pattern).width(10f)
         } else {
-            lineOptions = PolylineOptions().color(Color.RED).width(10f)
+            lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
         }
-        var polypoints = decodePoly(polyline)
+
+        var polypoints = decodePoly(steps.polyline.points)
 
         for (i in 0 until polypoints.size) {
             val lat = polypoints[i].latitude

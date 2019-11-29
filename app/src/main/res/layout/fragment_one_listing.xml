@@ -73,7 +73,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Commute Time: XX min" />
+            android:text="Commute Time: " />
 
         <TextView
             android:id="@+id/apartmentCommuteFare"
@@ -83,7 +83,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Commute Fare: $X.XX" />
+            android:text="Commute Fare: " />
 
         <FrameLayout
             android:id="@+id/apartmentMapFL"
@@ -110,7 +110,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:layout_marginEnd="16dp"/>
 
         <TextView
             android:id="@+id/apartmentRent"
@@ -120,7 +120,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Rent : $X,XXX/month" />
+            android:text="Rent : " />
 
         <TextView
             android:id="@+id/apartmentBedrooms"
@@ -140,7 +140,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Walk Score®: 0" />
+            android:text="Walk Score®: " />
 
         <TextView
             android:id="@+id/apartmentTransitScore"
@@ -150,7 +150,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Transit Score®: 0" />
+            android:text="Transit Score®: " />
 
         <TextView
             android:id="@+id/apartmentBikeScore"
@@ -160,7 +160,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Bike Score®: 0" />
+            android:text="Bike Score®: " />
 
         <TextView
             android:id="@+id/apartmentSoundScore"
@@ -170,7 +170,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Sound Score®: 0" />
+            android:text="Sound Score®: " />
 
     </LinearLayout>
 </ScrollView>

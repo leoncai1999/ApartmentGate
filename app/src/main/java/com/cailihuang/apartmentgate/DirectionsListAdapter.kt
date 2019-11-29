@@ -16,21 +16,56 @@ class DirectionsListAdapter(private val viewModel: MainViewModel): RecyclerView.
         : RecyclerView.ViewHolder(itemView) {
 
         var transitImage = itemView.findViewById<ImageView>(R.id.transitImage)
-        var directionsText = itemView.findViewById<TextView>(R.id.directionsText)
-        var distanceText = itemView.findViewById<TextView>(R.id.distanceText)
-        var timeText = itemView.findViewById<TextView>(R.id.timeText)
+        var detailsText = itemView.findViewById<TextView>(R.id.detailsText)
+        val distanceText = itemView.findViewById<TextView>(R.id.distanceText)
+        val durationText = itemView.findViewById<TextView>(R.id.durationText)
+        var departureStop = itemView.findViewById<TextView>(R.id.departureStop)
+        var arrivalStop = itemView.findViewById<TextView>(R.id.arrivalStop)
+        var numberStops = itemView.findViewById<TextView>(R.id.numberStops)
+        var transitLineDetails = itemView.findViewById<TextView>(R.id.transitLine)
 
         fun bind(item: DirectionsApi.Steps) {
+            detailsText.text = item.html_instructions
             if (item.travel_mode == "WALKING") {
+                departureStop.visibility = View.GONE
+                arrivalStop.visibility = View.GONE
+                numberStops.visibility = View.GONE
+                transitLineDetails.visibility = View.GONE
+                distanceText.text = "Distance: " + item.distance.text
+                durationText.text = "Time: " + item.duration.text
                 transitImage.setImageResource(R.drawable.ic_directions_walk_black_24dp)
             } else if (item.travel_mode == "TRANSIT") {
-                transitImage.setImageResource(R.drawable.ic_directions_transit_black_24dp)
-            } else if (item.travel_mode == "DRIVING") {
-                transitImage.setImageResource(R.drawable.ic_directions_car_black_24dp)
+                distanceText.visibility = View.GONE
+                durationText.visibility = View.GONE
+
+                val transitDetails = item.transit_details
+                val transitLine = transitDetails.line
+
+                departureStop.text = "Departue Stop: " + transitDetails.departure_stop.name
+                arrivalStop.text = "Arrival Stop: " + transitDetails.arrival_stop.name
+                numberStops.text = "Number of Stops: " + transitDetails.num_stops.toString()
+
+                var agencyName = ""
+                if (transitLine.agencies[0].name == "San Francisco Municipal Transportation Agency") {
+                    agencyName = "MUNI"
+                } else if (transitLine.agencies[0].name == "Bay Area Rapid Transit") {
+                    agencyName = "BART"
+                }
+                transitLineDetails.text = "Line: ".plus(agencyName).plus(" ").plus(transitLine.vehicle.name)
+                        .plus(" ").plus(transitLine.name).plus(" ")
+                        .plus(transitLine.short_name)
+
+                val vehicleType = transitLine.vehicle.type
+                if (vehicleType == "SUBWAY") {
+                    transitImage.setImageResource(R.drawable.ic_subway_black_24dp)
+                } else if (vehicleType == "BUS") {
+                    transitImage.setImageResource(R.drawable.ic_directions_bus_black_24dp)
+                } else if (vehicleType == "TRAM") {
+                    transitImage.setImageResource(R.drawable.ic_tram_black_24dp)
+                } else {
+                    transitImage.setImageResource(R.drawable.ic_directions_transit_black_24dp)
+                }
             }
-            directionsText.text = item.html_instructions
-            distanceText.text = "Distance: " + item.distance.text
-            timeText.text = "Time: " + item.duration.text
         }
     }
 
