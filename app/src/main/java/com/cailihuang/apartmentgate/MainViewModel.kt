@@ -5,14 +5,28 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.cailihuang.apartmentgate.api.*
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.security.AlgorithmParameterGenerator
 import java.util.concurrent.Semaphore
-
+import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 
 
 class MainViewModel : ViewModel() {
+
+    lateinit var db: FirebaseFirestore
+
+    fun initFirestore() {
+        db = FirebaseFirestore.getInstance()
+        if (db == null) {
+            Log.d("FirebaseFirestore", "FirebaseFirestore is null!")
+        }
+    }
 
     //private val apartApi = ApartmentApi.create()
     private val ApartRepository = ApartmentListingRepository()
@@ -115,4 +129,16 @@ class MainViewModel : ViewModel() {
     fun refresh() {
         fetchListings()
     }
+
+
+
+    fun addFav(favListing: ApartmentListing) {
+
+
+
+        val favoritesRef = db.collection("Users").document("userUID")
+        favoritesRef.update("favorites", favListing)
+    }
+
+
 }

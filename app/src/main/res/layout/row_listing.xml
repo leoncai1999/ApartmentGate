@@ -98,14 +98,7 @@
                     android:gravity="center"
                     />
             </LinearLayout>
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:layout_weight="1"
-                android:id="@+id/rowFav"
-                android:src="@drawable/ic_directions_car_black_24dp"
-                />
+
         </LinearLayout>
 
         <LinearLayout
@@ -130,6 +123,15 @@
                 android:id="@+id/commuteTimeTV"
                 android:textSize="12sp"
                 android:padding="10dp"
+                />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:layout_weight="1"
+                android:id="@+id/rowFav"
+                android:src="@drawable/ic_favorite_border_black_24dp"
                 />
 
         </LinearLayout>
