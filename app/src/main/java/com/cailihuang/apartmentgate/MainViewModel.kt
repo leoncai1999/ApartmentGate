@@ -5,14 +5,35 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.cailihuang.apartmentgate.api.*
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.security.AlgorithmParameterGenerator
 import java.util.concurrent.Semaphore
-
+import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FieldValue
 
 
 class MainViewModel : ViewModel() {
+
+    lateinit var db: FirebaseFirestore
+
+    fun initFirestore() {
+        db = FirebaseFirestore.getInstance()
+        if (db == null) {
+            Log.d("FirebaseFirestore", "FirebaseFirestore is null!")
+        }
+    }
+
+    private var favPosts = MutableLiveData<List<ApartmentListing>>().apply {
+        value = mutableListOf()
+    }
 
     //private val apartApi = ApartmentApi.create()
     private val ApartRepository = ApartmentListingRepository()
@@ -132,4 +153,78 @@ class MainViewModel : ViewModel() {
     fun refresh() {
         fetchListings()
     }
+
+    fun populateFavorites() {
+        val user = FirebaseAuth.getInstance().currentUser!!
+        val userRef = db.collection("Users").document(user?.uid.toString())
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
+                    val profile = document.toObject(UserProfile::class.java)
+                    favPosts.postValue(profile?.favorites)
+                } else {
+                    Log.d("CLOUD FIRESTORE", "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("CLOUD FIRESTORE", "get failed with ", exception)
+            }
+    }
+
+    fun addFav(favListing: ApartmentListing) {
+        val favoritesRef = db.collection("Users").document(FirebaseAuth.getInstance().currentUser!!.uid)
+        favoritesRef.update("favorites", FieldValue.arrayUnion(favListing))
+        populateFavorites()
+    }
+
+    fun removeFav(favListing: ApartmentListing) {
+        val favoritesRef = db.collection("Users").document(FirebaseAuth.getInstance().currentUser!!.uid)
+        favoritesRef.update("favorites", FieldValue.arrayRemove(favListing))
+
+        println("REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE")
+        populateFavorites()
+    }
+
+    fun isFav(listing: ApartmentListing): Boolean {
+        var isFav = false
+        val isFavSema = Semaphore(1)
+        val user = FirebaseAuth.getInstance().currentUser!!
+
+        isFavSema.acquire()
+
+        // PROBLEM AREA!!!
+
+        val userRef = db.collection("Users").document(user?.uid.toString())
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
+                    val profile = document.toObject(UserProfile::class.java)
+                    if (profile != null) {
+                        for (fav in profile.favorites) {
+                            if (fav.address == listing.address) {
+
+                                println("ISFAV ISFAV ISFAV ISFAV ISFAV ISFAV")
+                                isFav = true
+                            }
+                        }
+                    }
+                    isFavSema.release()
+                } else {
+                    Log.d("CLOUD FIRESTORE", "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("CLOUD FIRESTORE", "get failed with ", exception)
+            }
+
+        isFavSema.acquire()
+        return isFav
+    }
+
+    fun getFav(): LiveData<List<ApartmentListing>> {
+        return favPosts
+    }
+
 }

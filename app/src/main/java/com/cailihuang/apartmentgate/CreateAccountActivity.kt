@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_create_account.*
-import kotlinx.android.synthetic.main.activity_welcome.*
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -12,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.ArrayAdapter
 import android.app.Activity
 import android.graphics.Color
@@ -24,36 +24,29 @@ import kotlinx.android.synthetic.main.user_profile_information.*
 
 // TODO potentially add nickname
 
-
 class CreateAccountActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var mDatabaseReference: DatabaseReference
-    private lateinit var mDatabase: FirebaseDatabase
-
+    private lateinit var viewModel: MainViewModel
 
     private lateinit var preferredTransport: String
     private lateinit var demographic: String
     private lateinit var walkability: String
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_account)
 
         initializeFirebase()
-
         initializeLayoutElems()
 
         createProfileButton.setOnClickListener { createNewAccount() }
     }
 
-
     private fun initializeFirebase() {
         auth = FirebaseAuth.getInstance()
-        mDatabase = FirebaseDatabase.getInstance()
-        mDatabaseReference = mDatabase.reference.child("Users")
+        viewModel = MainViewModel()
+        viewModel.initFirestore()
     }
 
     private fun initializeLayoutElems() {
@@ -141,30 +134,35 @@ class CreateAccountActivity : AppCompatActivity() {
 
         val email = newEmailET.text.toString()
         val password = newPasswordET.text.toString()
-       // val firs
 
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
-
             if (it.isSuccessful) {
                 val user = auth.getCurrentUser()
                 Toast.makeText(this, "New user email: " + user?.email, Toast.LENGTH_LONG).show()
 
-                // update user profile information
-                val currentUserDb = mDatabaseReference.child(user?.uid.toString())
+                var newUser = UserProfile()
 
-                currentUserDb.child("email").setValue(newEmailET.text.toString())
-                currentUserDb.child("workAddress").setValue(addressET.text.toString())
-                currentUserDb.child("workStartHour").setValue(startTime.hour)
-                currentUserDb.child("workStartMin").setValue(startTime.minute)
-                currentUserDb.child("workEndHour").setValue(endTime.hour)
-                currentUserDb.child("workEndMin").setValue(endTime.minute)
-                currentUserDb.child("transportation").setValue(preferredTransport)
-                currentUserDb.child("maxCommuteTime").setValue(commuteTimeSpinner.selectedItem)
-                currentUserDb.child("demographic").setValue(demographic)
-                currentUserDb.child("walkability").setValue(walkability)
-                currentUserDb.child("budget").setValue(Integer.parseInt(budgetET.text.toString()))
-                currentUserDb.child("size").setValue(Integer.parseInt(sizeET.text.toString()))
+                newUser.email = newEmailET.text.toString()
+                newUser.workAddress= addressET.text.toString()
+                newUser.workStartHour = startTime.hour
+                newUser.workStartMin = startTime.minute
+                newUser.workEndHour = endTime.hour
+                newUser.workEndMin = endTime.minute
+                newUser.transportation = preferredTransport
+                newUser.maxCommuteTime = commuteTimeSpinner.selectedItem.toString()
+                newUser.demographic = demographic
+                newUser.walkability = walkability
+                newUser.budget = Integer.parseInt(budgetET.text.toString())
+                newUser.size = Integer.parseInt(sizeET.text.toString())
 
+                viewModel.db.collection("Users")
+                    .document(FirebaseAuth.getInstance().currentUser!!.uid).set(newUser)
+                    .addOnSuccessListener { documentReference ->
+                        Log.d("CLOUD CLOUD", "DocumentSnapshot written with ID: ${FirebaseAuth.getInstance().currentUser!!.uid}")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.w("CLOUD CLOUD", "Error adding document", e)
+                    }
             } else {
                 // password must be a certain mystery length long, probably eight
                 Log.d("FAILED PASSWORD ---" , " $password")
