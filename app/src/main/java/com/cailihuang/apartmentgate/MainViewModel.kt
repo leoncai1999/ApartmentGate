@@ -36,8 +36,8 @@ class MainViewModel : ViewModel() {
     private val directionsApi = DirectionsApi.create()
     private val directionsRepository = DirectionsRepository(directionsApi)
     private var currentCommuteTime = MutableLiveData<String>()
-    private var currentOverviewPolyline = MutableLiveData<String>()
-
+    private var currentCommuteFare = MutableLiveData<String>()
+    private var currentDirections = MutableLiveData<List<DirectionsApi.Steps>>()
 
     private fun fetchListings() = viewModelScope.launch(
         context = viewModelScope.coroutineContext
@@ -98,7 +98,20 @@ class MainViewModel : ViewModel() {
             val response = callResponse.execute()
             if (response.isSuccessful) {
                 currentCommuteTime.postValue(response.body()!!.routes[0].legs[0].duration.text)
-                currentOverviewPolyline.postValue(response.body()!!.routes[0].overview_polyline.points)
+
+                val fare = response.body()!!.routes[0].fare
+                if (fare != null) {
+                    currentCommuteFare.postValue(fare.text)
+                } else {
+                    currentCommuteFare.postValue("$0.00")
+                }
+
+                var directions = ArrayList<DirectionsApi.Steps>()
+                val steps = response.body()!!.routes[0].legs[0].steps
+                for (i in 0 until steps.size) {
+                    directions.add(steps[i])
+                }
+                currentDirections.postValue(directions)
             }
         }
     }
@@ -107,8 +120,12 @@ class MainViewModel : ViewModel() {
         return currentCommuteTime
     }
 
-    fun observeOverviewPolyline(): LiveData<String> {
-        return currentOverviewPolyline
+    fun observeCommuteFare(): LiveData<String> {
+        return currentCommuteFare
+    }
+
+    fun observeDirections(): LiveData<List<DirectionsApi.Steps>> {
+        return currentDirections
     }
 
     // to be used for filtering, sorting

@@ -11,6 +11,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
 import com.cailihuang.apartmentgate.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -28,6 +30,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
     private lateinit var rootView: View
+    private lateinit var directionsAdapter: DirectionsListAdapter
 
     companion object {
         fun newInstance(listing: ApartmentListing): OneListingFragment {
@@ -37,6 +40,13 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             oneListingFragment.arguments = args
             return oneListingFragment
         }
+    }
+
+    private fun initAdapter(root: View) {
+        val rv = root.findViewById<RecyclerView>(R.id.directionsRV)
+        directionsAdapter = DirectionsListAdapter(viewModel)
+        rv.adapter = directionsAdapter
+        rv.layoutManager = LinearLayoutManager(context) // check this
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -120,33 +130,51 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         viewModel.fetchDirections(origin, destination, "transit", APIKeys.googleMapsAPIKey)
 
         val apartmentCommuteTimeTV = rootView.findViewById<TextView>(R.id.apartmentCommuteTime)
+        val apartmentCommuteFareTV = rootView.findViewById<TextView>(R.id.apartmentCommuteFare)
 
         viewModel.observeCommuteTime().observe(this, Observer {
             apartmentCommuteTimeTV.text = "Commute Time: " + it
         })
 
-        viewModel.observeOverviewPolyline().observe(this, Observer {
+        viewModel.observeCommuteFare().observe(this, Observer {
+            apartmentCommuteFareTV.text = "Commute Fare: " + it
+        })
+
+        viewModel.observeDirections().observe(this, Observer {
             map.clear()
-            var points = ArrayList<LatLng>()
-            val lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
-            var polypoints = decodePoly(it)
-
-            for (i in 0 until polypoints.size) {
-                val lat = polypoints[i].latitude
-                val lon = polypoints[i].longitude
-                points.add(LatLng(lat, lon))
+            for (i in 0 until it.size) {
+                drawPoly(it[i].polyline.points, it[i].travel_mode)
             }
-
-            lineOptions.addAll(points)
-            map.addPolyline(lineOptions)
             map.addMarker(MarkerOptions().position(apartmentCoords)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
             map.addMarker(MarkerOptions().position(workCoords))
-
             val zoomBounds = LatLngBounds.Builder().include(apartmentCoords).include(workCoords).build()
             map.moveCamera(CameraUpdateFactory.newLatLngBounds(zoomBounds, 100))
+
+            initAdapter(rootView)
+            directionsAdapter.submitList(it)
         })
 
+    }
+
+    private fun drawPoly(polyline: String, mode: String) {
+        var points = ArrayList<LatLng>()
+        lateinit var lineOptions: PolylineOptions
+        if (mode == "TRANSIT") {
+            lineOptions = PolylineOptions().color(Color.GREEN).width(10f)
+        } else {
+            lineOptions = PolylineOptions().color(Color.RED).width(10f)
+        }
+        var polypoints = decodePoly(polyline)
+
+        for (i in 0 until polypoints.size) {
+            val lat = polypoints[i].latitude
+            val lon = polypoints[i].longitude
+            points.add(LatLng(lat, lon))
+        }
+
+        lineOptions.addAll(points)
+        map.addPolyline(lineOptions)
     }
 
     /**
