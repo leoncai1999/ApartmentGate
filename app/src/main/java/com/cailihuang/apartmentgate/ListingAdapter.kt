@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import java.util.concurrent.Semaphore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FieldPath
@@ -53,7 +54,11 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             bedTextView.text = item.bds
             commuteTextView.text = viewModel.commuteTimes.get(item.address)?.text
 
+            println("LIST ADAPTER ITEM --- " + item.name)
+
             if (viewModel.isFav(item)) {
+                println("ITEM IS FAV --- " + item.name)
+
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)
             }
 
@@ -66,10 +71,12 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 val position = adapterPosition
                 // Toggle Favorite
                 if (viewModel.isFav(getItem(position))) {
+                    println("REMOVE FAV ITEM --- " + item.name)
+
                     viewModel.removeFav(getItem(position))
-                    favView.setImageResource(R.drawable.ic_favorite_border_black_24dp)
                 } else {
-                    favView.setImageResource(R.drawable.ic_favorite_black_24dp)
+                    println("ADD FAV ITEM --- " + item.name)
+
                     viewModel.addFav(getItem(position))
                 }
                 notifyItemChanged(position)

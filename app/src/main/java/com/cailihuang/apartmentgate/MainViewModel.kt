@@ -17,21 +17,25 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 
 
 class MainViewModel : ViewModel() {
 
     lateinit var db: FirebaseFirestore
+    lateinit var userRef: DocumentReference
 
     fun initFirestore() {
         db = FirebaseFirestore.getInstance()
         if (db == null) {
             Log.d("FirebaseFirestore", "FirebaseFirestore is null!")
         }
+        val user = FirebaseAuth.getInstance().currentUser!!
+        userRef = db.collection("Users").document(user.uid.toString())
     }
 
-    private var favPosts = MutableLiveData<List<ApartmentListing>>().apply {
+    private var favListings = MutableLiveData<List<ApartmentListing>>().apply {
         value = mutableListOf()
     }
 
@@ -145,7 +149,7 @@ class MainViewModel : ViewModel() {
                 if (document != null) {
                     Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
                     val profile = document.toObject(UserProfile::class.java)
-                    favPosts.postValue(profile?.favorites)
+                    favListings.postValue(profile?.favorites)
                 } else {
                     Log.d("CLOUD FIRESTORE", "No such document")
                 }
@@ -156,58 +160,37 @@ class MainViewModel : ViewModel() {
     }
 
     fun addFav(favListing: ApartmentListing) {
+        val localList = favListings.value?.toMutableList()
+        localList?.let {
+            it.add(favListing)
+            favListings.value = it
+        }
         val favoritesRef = db.collection("Users").document(FirebaseAuth.getInstance().currentUser!!.uid)
         favoritesRef.update("favorites", FieldValue.arrayUnion(favListing))
-        populateFavorites()
     }
 
     fun removeFav(favListing: ApartmentListing) {
+        val localList = favListings.value?.toMutableList()
+        localList?.let {
+            it.remove(favListing)
+            favListings.value = it
+        }
         val favoritesRef = db.collection("Users").document(FirebaseAuth.getInstance().currentUser!!.uid)
         favoritesRef.update("favorites", FieldValue.arrayRemove(favListing))
-
-        println("REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE")
-        populateFavorites()
     }
 
     fun isFav(listing: ApartmentListing): Boolean {
-        var isFav = false
-        val isFavSema = Semaphore(1)
-        val user = FirebaseAuth.getInstance().currentUser!!
-
-        isFavSema.acquire()
-
-        // PROBLEM AREA!!!
-
-        val userRef = db.collection("Users").document(user?.uid.toString())
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
-                    val profile = document.toObject(UserProfile::class.java)
-                    if (profile != null) {
-                        for (fav in profile.favorites) {
-                            if (fav.address == listing.address) {
-
-                                println("ISFAV ISFAV ISFAV ISFAV ISFAV ISFAV")
-                                isFav = true
-                            }
-                        }
-                    }
-                    isFavSema.release()
-                } else {
-                    Log.d("CLOUD FIRESTORE", "No such document")
-                }
+        for (fav in favListings.value.orEmpty()) {
+            if (fav.address == listing.address) {
+                return true
             }
-            .addOnFailureListener { exception ->
-                Log.d("CLOUD FIRESTORE", "get failed with ", exception)
-            }
+        }
 
-        isFavSema.acquire()
-        return isFav
+        return false
     }
 
     fun getFav(): LiveData<List<ApartmentListing>> {
-        return favPosts
+        return favListings
     }
 
 }

@@ -158,14 +158,14 @@ class CreateAccountActivity : AppCompatActivity() {
                 viewModel.db.collection("Users")
                     .document(FirebaseAuth.getInstance().currentUser!!.uid).set(newUser)
                     .addOnSuccessListener { documentReference ->
-                        Log.d("CLOUD CLOUD", "DocumentSnapshot written with ID: ${FirebaseAuth.getInstance().currentUser!!.uid}")
+                        Log.d("CLOUD FIRESTORE", "DocumentSnapshot written with ID: ${FirebaseAuth.getInstance().currentUser!!.uid}")
                     }
                     .addOnFailureListener { e ->
-                        Log.w("CLOUD CLOUD", "Error adding document", e)
+                        Log.w("CLOUD FIRESTORE", "Error adding document", e)
                     }
             } else {
                 // password must be a certain mystery length long, probably eight
-                Log.d("FAILED PASSWORD ---" , " $password")
+                Log.d("FAILED PASSWORD: " , " $password")
             }
 
             val mainActivityIntent = Intent(this, MainActivity::class.java)

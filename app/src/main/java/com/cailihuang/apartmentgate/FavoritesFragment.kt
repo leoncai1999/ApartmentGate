@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 
 import kotlinx.android.synthetic.main.fragment_profile.*
 import kotlinx.android.synthetic.main.user_profile_information.*
@@ -30,7 +31,6 @@ class FavoritesFragment: Fragment() {
     }
 
     private fun initAdapter(root: View) {
-        viewModel = MainViewModel()
         viewModel.initFirestore()
         val rv = root.findViewById<RecyclerView>(R.id.recyclerViewFav)
         listAdapter = ListingAdapter(viewModel)
@@ -42,6 +42,9 @@ class FavoritesFragment: Fragment() {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val root = inflater.inflate(R.layout.fragment_favorites, container, false)
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[MainViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
 
         initAdapter(root)
         viewModel.populateFavorites()

@@ -82,7 +82,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         listButton.setOnClickListener {
             gotCommuteTimesSema.acquire()
-
             (activity as MainActivity).setFragment(ListFragment.newInstance())
         }
     }
@@ -99,6 +98,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         viewModel = activity?.run {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
+
+        viewModel.initFirestore()
 
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
         ref.addValueEventListener(object : ValueEventListener {

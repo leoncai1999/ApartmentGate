@@ -3,7 +3,6 @@ package com.cailihuang.apartmentgate
 import android.media.Image
 import android.os.Bundle
 import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,8 +22,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.cailihuang.apartmentgate.MapFragment
-
 
 
 class ListFragment: Fragment() {
@@ -38,7 +35,6 @@ class ListFragment: Fragment() {
     }
 
     private fun initAdapter(root: View) {
-        viewModel = MainViewModel()
         viewModel.initFirestore()
         val rv = root.findViewById<RecyclerView>(R.id.recyclerViewList)
         listAdapter = ListingAdapter(viewModel)
@@ -58,13 +54,14 @@ class ListFragment: Fragment() {
         val root = inflater.inflate(R.layout.fragment_list, container, false)
 
         initAdapter(root)
-        //viewModel.refresh()
+        viewModel.populateFavorites()
 
         val listings = mutableListOf<ApartmentListing>()
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
 
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
+
                 for (productSnapshot in dataSnapshot.children) {
                     val listing = productSnapshot.getValue(ApartmentListing::class.java)
                     listings.add(listing!!)
