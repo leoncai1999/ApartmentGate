@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_favorites -> {
                     println("favorites pressed")
+                    setFragment(FavoritesFragment.newInstance())
                     true
                 }
                 R.id.navigation_profile -> {

@@ -42,7 +42,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
         var rentTextView = itemView.findViewById<TextView>(R.id.rentTV)
         var bedTextView = itemView.findViewById<TextView>(R.id.bedTV)
         var commuteTextView = itemView.findViewById<TextView>(R.id.commuteTimeTV)
-        var favView = itemView.findViewById<TextView>(R.id.rowFav)
+        var favView = itemView.findViewById<ImageView>(R.id.rowFav)
 
         fun bind(item: ApartmentListing?) {
             if (item == null) return
@@ -53,6 +53,10 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             bedTextView.text = item.bds
             commuteTextView.text = viewModel.commuteTimes.get(item.address)?.text
 
+            if (viewModel.isFav(item)) {
+                favView.setImageResource(R.drawable.ic_favorite_black_24dp)
+            }
+
             nameTextView.setOnClickListener {
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))
             }
@@ -61,11 +65,13 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             favView.setOnClickListener{
                 val position = adapterPosition
                 // Toggle Favorite
-//                if (isFav(getItem(position))) {
-//                    removeFav(getItem(position))
-//                } else {
+                if (viewModel.isFav(getItem(position))) {
+                    viewModel.removeFav(getItem(position))
+                    favView.setImageResource(R.drawable.ic_favorite_border_black_24dp)
+                } else {
+                    favView.setImageResource(R.drawable.ic_favorite_black_24dp)
                     viewModel.addFav(getItem(position))
-//                }
+                }
                 notifyItemChanged(position)
             }
         }

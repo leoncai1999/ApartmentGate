@@ -1,5 +1,7 @@
 package com.cailihuang.apartmentgate
 
+import com.cailihuang.apartmentgate.api.ApartmentListing
+
 class UserProfile {
     var budget = 0
     var demographic = ""
@@ -13,5 +15,5 @@ class UserProfile {
     var workEndMin = 0
     var workStartHour = 0
     var workStartMin = 0
-    var favorites = listOf<String>()
+    var favorites = listOf<ApartmentListing>()
 }

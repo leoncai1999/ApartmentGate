@@ -38,9 +38,9 @@ class ListFragment: Fragment() {
     }
 
     private fun initAdapter(root: View) {
-        val rv = root.findViewById<RecyclerView>(R.id.recyclerView)
-        //val parentMapFrag = parentFragment
-        //viewModel = (parentFragment as MapFragment).getMapViewModel()
+        viewModel = MainViewModel()
+        viewModel.initFirestore()
+        val rv = root.findViewById<RecyclerView>(R.id.recyclerViewList)
         listAdapter = ListingAdapter(viewModel)
         rv.adapter = listAdapter
         rv.layoutManager = LinearLayoutManager(context)
