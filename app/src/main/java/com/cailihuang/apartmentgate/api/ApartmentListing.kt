@@ -13,7 +13,7 @@ data class ApartmentListing (
         var address1: String = "",
         @field:SerializedName("address2")
         var address2: String = "",
-        @field:SerializedName("beds")
+        @field:SerializedName("baths")
         var baths: Int = 0,
         @field:SerializedName("beds")
         var beds: Int = 0,

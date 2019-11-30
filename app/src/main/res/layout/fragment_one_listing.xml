@@ -132,25 +132,67 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"/>
 
-        <TextView
-            android:id="@+id/apartmentRent"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Rent : " />
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/apartmentRent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textSize="16dp"
+                android:text="Rent: "
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/apartmentSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Size: "
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/apartmentBedrooms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textSize="16dp"
+                android:text="Bedrooms: "
+                android:layout_weight="1"/>
+
+            <TextView
+                android:id="@+id/apartmentBathrooms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Bathrooms: "
+                android:layout_weight="1"/>
+
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/apartmentBedrooms"
+            android:id="@+id/apartmentNeighborhood"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
-            android:text="Bedrooms : 2" />
+            android:text="Neighborhood: " />
 
         <TextView
             android:id="@+id/apartmentWalkScore"
@@ -191,6 +233,16 @@
             android:layout_marginEnd="16dp"
             android:textSize="16dp"
             android:text="Sound Score®: " />
+
+        <TextView
+            android:id="@+id/apartmentDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:textSize="16dp" />
 
     </LinearLayout>
 </ScrollView>

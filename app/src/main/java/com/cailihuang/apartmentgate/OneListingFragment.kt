@@ -72,6 +72,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         rootView = inflater.inflate(R.layout.fragment_one_listing, container, false)
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
+        val fullAddress = listing!!.address1.substringBefore(" Unit") + ", " + listing.address2
 
         val backButton = rootView.findViewById<TextView>(R.id.backButton)
         backButton.setOnClickListener {
@@ -81,13 +82,25 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val apartmentNameTV = rootView.findViewById<TextView>(R.id.apartmentName)
         apartmentNameTV.text = listing!!.address1
         val apartmentAddressTV = rootView.findViewById<TextView>(R.id.apartmentAddress)
-        apartmentAddressTV.text = listing.address2
+        apartmentAddressTV.text = fullAddress
         val apartmentRentTV = rootView.findViewById<TextView>(R.id.apartmentRent)
-        apartmentRentTV.text = "Rent: " + listing.rent + "/month"
+        apartmentRentTV.text = "Rent: $" + listing.rent + "/month"
         val apartmentBedroomsTV = rootView.findViewById<TextView>(R.id.apartmentBedrooms)
-        apartmentBedroomsTV.text = "Bedrooms: " + listing.beds
+        if (listing.beds == 0) {
+            apartmentBedroomsTV.text = "Bedrooms: Studio"
+        } else {
+            apartmentBedroomsTV.text = "Bedrooms: " + listing.beds
+        }
+        val apartmentBathroomsTV = rootView.findViewById<TextView>(R.id.apartmentBathrooms)
+        apartmentBathroomsTV.text = "Bathooms: " + listing.baths
+        val apartmentSizeTV = rootView.findViewById<TextView>(R.id.apartmentSize)
+        apartmentSizeTV.text = "Size: " + listing.size + " Sq Ft"
+        val apartmentNeighborhoodTV = rootView.findViewById<TextView>(R.id.apartmentNeighborhood)
+        apartmentNeighborhoodTV.text = "Neighorhood: " + listing.neighborhood
+        val apartmentDescriptionTV = rootView.findViewById<TextView>(R.id.apartmentDescription)
+        apartmentDescriptionTV.text = listing.about
 
-        val apartmentAddress = geocoder.getFromLocationName(listing.address1, 1)
+        val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
         val apartmentImage = rootView.findViewById<ImageView>(R.id.apartmentImage)
         val imageURL = "https://maps.googleapis.com/maps/api/streetview?size=600x300&location="
                 .plus(apartmentAddress[0].latitude.toString()).plus(",%20")
@@ -101,12 +114,11 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val apartmentBikeScoreTV = rootView.findViewById<TextView>(R.id.apartmentBikeScore)
         val apartmentSoundScoreTV = rootView.findViewById<TextView>(R.id.apartmentSoundScore)
 
-        val coords = geocoder.getFromLocationName(listing.address1, 1)
+        val coords = geocoder.getFromLocationName(fullAddress, 1)
 
-        viewModel.fetchWalkScore(URLEncoder.encode(listing.address1, "UTF-8"),
+        viewModel.fetchWalkScore(URLEncoder.encode(fullAddress, "UTF-8"),
                 coords[0].latitude.toString(), coords[0].longitude.toString(), APIKeys.walkscoreAPIKey)
         viewModel.observeWalkScore().observe(this, Observer {
-            // TODO: Must comply with branding requirements by linking to walkscore website
             val wsHelpLink = it.help_link
             val walkscoreText = SpannableString("Walk Score®: " + it.walkscore)
             walkscoreText.setSpan(UnderlineSpan(), 0, 10, 0)
@@ -136,7 +148,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             }
         })
 
-        viewModel.fetchHowLoudScore(URLEncoder.encode(listing.address1, "UTF-8"), APIKeys.soundscoreAPIKey)
+        viewModel.fetchHowLoudScore(URLEncoder.encode(fullAddress, "UTF-8"), APIKeys.soundscoreAPIKey)
         viewModel.observeHowLoudScore().observe(this, Observer {
             apartmentSoundScoreTV.text = "Sound Score®: " + it.score
         })
@@ -151,7 +163,8 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         map = googleMap
 
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
-        val apartmentAddress = geocoder.getFromLocationName(listing!!.address1, 1)
+        val fullAddress = listing!!.address1.substringBefore(" Unit") + ", " + listing.address2
+        val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
         val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
         val apartmentCoords = LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude)
         val workCoords = LatLng(workAddress[0].latitude, workAddress[0].longitude)
@@ -187,11 +200,12 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             })
         }
 
-        map.clear()
         lateinit var lineOptions: PolylineOptions
+        var chromeBlue = Color.parseColor("#4285F4")
 
         if (mode == "transit") {
             viewModel.observeDirections().observe(this, Observer {
+                map.clear()
                 commuteDistance.visibility = View.GONE
                 durationInTraffic.visibility = View.GONE
 
@@ -202,17 +216,19 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
                             // Light rail and Subway lines have special route colors
                             lineOptions = PolylineOptions().color(Color.parseColor(lineColor)).width(10f)
                         } else {
-                            lineOptions = PolylineOptions().color(Color.CYAN).width(10f)
+                            lineOptions = PolylineOptions().color(chromeBlue).width(10f)
                         }
                     } else if  (it[i].travel_mode == "WALKING") {
-                        val pattern = Arrays.asList(Dot(), Gap(20f), Dash(30f), Gap(20f))
-                        lineOptions = PolylineOptions().color(Color.BLUE).pattern(pattern).width(10f)
+                        val pattern = Arrays.asList(Dot(), Gap(15f))
+                        lineOptions = PolylineOptions().color(chromeBlue).pattern(pattern).width(10f)
                     } else {
-                        lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
+                        lineOptions = PolylineOptions().color(chromeBlue).width(10f)
                     }
 
                     drawPoly(it[i].polyline.points, lineOptions)
                 }
+
+                plotMarkers(apartmentCoords, workCoords)
 
                 initAdapter(rootView)
                 directionsAdapter.submitList(it)
@@ -222,6 +238,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
                 commuteDistance.text = "Distance: " + it
             })
             viewModel.observeOverviewPolyline().observe(this, Observer {
+                map.clear()
                 commuteFare.visibility = View.GONE
                 directionsRV.visibility = View.GONE
 
@@ -236,15 +253,17 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
                     lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
                 }
                 drawPoly(it, lineOptions)
+                plotMarkers(apartmentCoords, workCoords)
             })
         }
+    }
 
+    fun plotMarkers(apartmentCoords: LatLng, workCoords: LatLng) {
         map.addMarker(MarkerOptions().position(apartmentCoords)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
         map.addMarker(MarkerOptions().position(workCoords))
         val zoomBounds = LatLngBounds.Builder().include(apartmentCoords).include(workCoords).build()
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(zoomBounds, 100))
-
     }
 
     private fun drawPoly(polyline: String, lineOptions: PolylineOptions) {
