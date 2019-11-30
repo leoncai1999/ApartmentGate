@@ -25,12 +25,12 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
     class ApartmentDiff : DiffUtil.ItemCallback<ApartmentListing>() {
 
         override fun areItemsTheSame(oldItem: ApartmentListing, newItem: ApartmentListing): Boolean {
-            return oldItem.address == newItem.address
+            return oldItem.address1 == newItem.address1
         }
 
         override fun areContentsTheSame(oldItem: ApartmentListing, newItem: ApartmentListing): Boolean {
-            return oldItem.name == newItem.name
-                    && oldItem.bds == newItem.bds
+            return oldItem.about == newItem.about
+                    && oldItem.beds == newItem.beds
                     && oldItem.rent == newItem.rent
         }
     }
@@ -48,17 +48,16 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
         fun bind(item: ApartmentListing?) {
             if (item == null) return
 
-            nameTextView.text = item.name
-            addressTextView.text = item.address
-            rentTextView.text = item.rent
-            bedTextView.text = item.bds
-            commuteTextView.text = viewModel.commuteTimes.get(item.address)?.text
+            nameTextView.text = item.address1
+            addressTextView.text = item.address2
+            rentTextView.text = item.rent.toString()
+            bedTextView.text = item.beds.toString()
+            commuteTextView.text = viewModel.commuteTimes.get(item.address1)?.text
 
-            println("LIST ADAPTER ITEM --- " + item.name)
+            //println("LIST ADAPTER ITEM --- " + item.name)
 
             if (viewModel.isFav(item)) {
-                println("ITEM IS FAV --- " + item.name)
-
+                println("ITEM IS FAV --- " + item.address1)
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)
             }
 
@@ -71,11 +70,11 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 val position = adapterPosition
                 // Toggle Favorite
                 if (viewModel.isFav(getItem(position))) {
-                    println("REMOVE FAV ITEM --- " + item.name)
+                    println("REMOVE FAV ITEM --- " + item.address1)
 
                     viewModel.removeFav(getItem(position))
                 } else {
-                    println("ADD FAV ITEM --- " + item.name)
+                    println("ADD FAV ITEM --- " + item.address1)
 
                     viewModel.addFav(getItem(position))
                 }

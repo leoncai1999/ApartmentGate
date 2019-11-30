@@ -79,15 +79,15 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         }
 
         val apartmentNameTV = rootView.findViewById<TextView>(R.id.apartmentName)
-        apartmentNameTV.text = listing!!.name
+        apartmentNameTV.text = listing!!.address1
         val apartmentAddressTV = rootView.findViewById<TextView>(R.id.apartmentAddress)
-        apartmentAddressTV.text = listing!!.address
+        apartmentAddressTV.text = listing.address2
         val apartmentRentTV = rootView.findViewById<TextView>(R.id.apartmentRent)
-        apartmentRentTV.text = "Rent: " + listing!!.rent + "/month"
+        apartmentRentTV.text = "Rent: " + listing.rent + "/month"
         val apartmentBedroomsTV = rootView.findViewById<TextView>(R.id.apartmentBedrooms)
-        apartmentBedroomsTV.text = "Bedrooms: " + listing!!.bds
+        apartmentBedroomsTV.text = "Bedrooms: " + listing.beds
 
-        val apartmentAddress = geocoder.getFromLocationName(listing!!.address, 1)
+        val apartmentAddress = geocoder.getFromLocationName(listing.address1, 1)
         val apartmentImage = rootView.findViewById<ImageView>(R.id.apartmentImage)
         val imageURL = "https://maps.googleapis.com/maps/api/streetview?size=600x300&location="
                 .plus(apartmentAddress[0].latitude.toString()).plus(",%20")
@@ -101,9 +101,9 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val apartmentBikeScoreTV = rootView.findViewById<TextView>(R.id.apartmentBikeScore)
         val apartmentSoundScoreTV = rootView.findViewById<TextView>(R.id.apartmentSoundScore)
 
-        val coords = geocoder.getFromLocationName(listing!!.address, 1)
+        val coords = geocoder.getFromLocationName(listing.address1, 1)
 
-        viewModel.fetchWalkScore(URLEncoder.encode(listing!!.address, "UTF-8"),
+        viewModel.fetchWalkScore(URLEncoder.encode(listing.address1, "UTF-8"),
                 coords[0].latitude.toString(), coords[0].longitude.toString(), APIKeys.walkscoreAPIKey)
         viewModel.observeWalkScore().observe(this, Observer {
             // TODO: Must comply with branding requirements by linking to walkscore website
@@ -136,7 +136,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             }
         })
 
-        viewModel.fetchHowLoudScore(URLEncoder.encode(listing!!.address, "UTF-8"), APIKeys.soundscoreAPIKey)
+        viewModel.fetchHowLoudScore(URLEncoder.encode(listing.address1, "UTF-8"), APIKeys.soundscoreAPIKey)
         viewModel.observeHowLoudScore().observe(this, Observer {
             apartmentSoundScoreTV.text = "Sound Score®: " + it.score
         })
@@ -151,7 +151,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         map = googleMap
 
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
-        val apartmentAddress = geocoder.getFromLocationName(listing!!.address, 1)
+        val apartmentAddress = geocoder.getFromLocationName(listing!!.address1, 1)
         val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
         val apartmentCoords = LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude)
         val workCoords = LatLng(workAddress[0].latitude, workAddress[0].longitude)

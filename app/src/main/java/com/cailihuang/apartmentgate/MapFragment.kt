@@ -116,10 +116,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 for (productSnapshot in dataSnapshot.children) {
                     if (count < 5) { // temporary solution
-                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
-                        listings.add(apartment!!)
-                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
-                        map.setInfoWindowAdapter(markerInfoWindow)
+//                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
+//                        listings.add(apartment!!)
+//                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+//                        map.setInfoWindowAdapter(markerInfoWindow)
 
 //                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
 //                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
@@ -145,7 +145,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                         Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
 
-                        viewModel.commuteTimes.put(apartment.address, commuteTime)
+                        //viewModel.commuteTimes.put(apartment.address1, commuteTime)
 
                         count++
                     }
@@ -186,7 +186,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun getListingFromTitle(title: String): ApartmentListing {
         for (listing in listings) {
-            if (listing.name == title) {
+            if (listing.address1 == title) {
                 return listing
             }
         }

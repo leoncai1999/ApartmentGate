@@ -7,14 +7,24 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class ApartmentListing (
-        @field:SerializedName("name")
-        var name: String = "",
-        @field:SerializedName("url")
-        var url: String = "",
-        @field:SerializedName("address")
-        var address: String = "",
-        @field:SerializedName("bds")
-        var bds: String = "",
+        @field:SerializedName("about")
+        var about: String = "",
+        @field:SerializedName("address1")
+        var address1: String = "",
+        @field:SerializedName("address2")
+        var address2: String = "",
+        @field:SerializedName("beds")
+        var baths: Int = 0,
+        @field:SerializedName("beds")
+        var beds: Int = 0,
+        @field:SerializedName("deposit")
+        var deposit: Int = 0,
+        @field:SerializedName("neighborhood")
+        var neighborhood: String = "",
+        @field:SerializedName("neighborhood_url")
+        var neighborhood_url: String = "",
         @field:SerializedName("rent")
-        var rent: String = ""
+        var rent: Int = 0,
+        @field:SerializedName("size")
+        var size: Int = 0
 ): Parcelable

@@ -28,11 +28,8 @@ class MainViewModel : ViewModel() {
 
     fun initFirestore() {
         db = FirebaseFirestore.getInstance()
-        if (db == null) {
-            Log.d("FirebaseFirestore", "FirebaseFirestore is null!")
-        }
         val user = FirebaseAuth.getInstance().currentUser!!
-        userRef = db.collection("Users").document(user.uid.toString())
+        userRef = db.collection("Users").document(user.uid)
     }
 
     private var favListings = MutableLiveData<List<ApartmentListing>>().apply {
@@ -50,6 +47,7 @@ class MainViewModel : ViewModel() {
     private val workAddress = MutableLiveData<String>().apply {
         value = "160 Spear St, San Francisco, CA"
     }
+
     private val walkScoreApi = WalkScoreApi.create()
     private val walkScoreRepository = WalkScoreRepository(walkScoreApi)
     private var currentWalkScore = MutableLiveData<WalkScore>()
@@ -67,14 +65,21 @@ class MainViewModel : ViewModel() {
     private var currentDistance = MutableLiveData<String>()
     private var currentDurationInTraffic = MutableLiveData<String>()
 
-    private fun fetchListings() = viewModelScope.launch(
-        context = viewModelScope.coroutineContext
-                + Dispatchers.IO) {
-        // Update LiveData from IO dispatcher, use postValue
-        apartmentListings.postValue(ApartRepository.getListings())
+    fun populateListings() {
+        val listingRef = db.collection("listing")
+        val listings = mutableListOf<ApartmentListing>()
+        listingRef
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val aListing = document.toObject(ApartmentListing::class.java)
+                    listings.add(aListing)
+                }
+                apartmentListings.postValue(listings)
+            }
     }
 
-    fun observeListings(): LiveData<List<ApartmentListing>> {
+    fun getListings(): LiveData<List<ApartmentListing>> {
         return apartmentListings
     }
 
@@ -176,14 +181,7 @@ class MainViewModel : ViewModel() {
         return currentDurationInTraffic
     }
 
-    // to be used for filtering, sorting
-    fun refresh() {
-        fetchListings()
-    }
-
     fun populateFavorites() {
-        val user = FirebaseAuth.getInstance().currentUser!!
-        val userRef = db.collection("Users").document(user?.uid.toString())
         userRef.get()
             .addOnSuccessListener { document ->
                 if (document != null) {
@@ -221,11 +219,10 @@ class MainViewModel : ViewModel() {
 
     fun isFav(listing: ApartmentListing): Boolean {
         for (fav in favListings.value.orEmpty()) {
-            if (fav.address == listing.address) {
+            if (fav.address1 == listing.address1) {
                 return true
             }
         }
-
         return false
     }
 
