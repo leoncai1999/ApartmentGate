@@ -78,6 +78,11 @@ interface DirectionsApi {
             val value : Int
     )
 
+    data class Duration_in_traffic (
+            val text : String,
+            val value : Int
+    )
+
     data class End_location (
             val lat : Double,
             val lng : Double
@@ -91,6 +96,7 @@ interface DirectionsApi {
     data class Steps (
             val distance : Distance,
             val duration : Duration,
+            val duration_in_traffic: Duration_in_traffic,
             val end_location : End_location,
             val html_instructions : String,
             val polyline : Polyline,

@@ -1,8 +1,12 @@
 package com.cailihuang.apartmentgate
 
+import android.content.Intent
 import android.graphics.Color
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.UnderlineSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -103,9 +107,33 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
                 coords[0].latitude.toString(), coords[0].longitude.toString(), APIKeys.walkscoreAPIKey)
         viewModel.observeWalkScore().observe(this, Observer {
             // TODO: Must comply with branding requirements by linking to walkscore website
-            apartmentWalkScoreTV.text = "Walk Score®: " + it.walkscore
-            apartmentTransitScoreTV.text = "Transit Score®: " + it.transit.score
-            apartmentBikeScoreTV.text = "Bike Score®: " + it.bike.score
+            val wsHelpLink = it.help_link
+            val walkscoreText = SpannableString("Walk Score®: " + it.walkscore)
+            walkscoreText.setSpan(UnderlineSpan(), 0, 10, 0)
+            walkscoreText.setSpan(UnderlineSpan(), 13, walkscoreText.length, 0)
+            apartmentWalkScoreTV.text = walkscoreText
+            apartmentWalkScoreTV.setOnClickListener {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(wsHelpLink))
+                startActivity(browserIntent)
+            }
+
+            val transitscoreText = SpannableString("Transit Score®: " + it.transit.score)
+            transitscoreText.setSpan(UnderlineSpan(), 0, 13, 0)
+            transitscoreText.setSpan(UnderlineSpan(), 16, transitscoreText.length, 0)
+            apartmentTransitScoreTV.text = transitscoreText
+            apartmentTransitScoreTV.setOnClickListener {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(wsHelpLink))
+                startActivity(browserIntent)
+            }
+
+            val bikescoreText = SpannableString("Bike Score®: " + it.bike.score)
+            bikescoreText.setSpan(UnderlineSpan(), 0, 10, 0)
+            bikescoreText.setSpan(UnderlineSpan(), 13, bikescoreText.length, 0)
+            apartmentBikeScoreTV.text = bikescoreText
+            apartmentBikeScoreTV.setOnClickListener {
+                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(wsHelpLink))
+                startActivity(browserIntent)
+            }
         })
 
         viewModel.fetchHowLoudScore(URLEncoder.encode(listing!!.address, "UTF-8"), APIKeys.soundscoreAPIKey)
@@ -148,42 +176,80 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
             apartmentCommuteFareTV.text = "Commute Fare: " + it
         })
 
-        viewModel.observeDirections().observe(this, Observer {
-            map.clear()
-            for (i in 0 until it.size) {
-                drawPoly(it[i])
-            }
-            map.addMarker(MarkerOptions().position(apartmentCoords)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-            map.addMarker(MarkerOptions().position(workCoords))
-            val zoomBounds = LatLngBounds.Builder().include(apartmentCoords).include(workCoords).build()
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(zoomBounds, 100))
+        val commuteFare = rootView.findViewById<TextView>(R.id.apartmentCommuteFare)
+        val commuteDistance = rootView.findViewById<TextView>(R.id.commuteDistance)
+        val durationInTraffic = rootView.findViewById<TextView>(R.id.durationInTraffic)
+        val directionsRV = rootView.findViewById<RecyclerView>(R.id.directionsRV)
 
-            initAdapter(rootView)
-            directionsAdapter.submitList(it)
-        })
+        if (mode == "driving") {
+            viewModel.observeDurationInTraffic().observe(this, Observer {
+                durationInTraffic.text = "Duration in Traffic: " + it
+            })
+        }
+
+        map.clear()
+        lateinit var lineOptions: PolylineOptions
+
+        if (mode == "transit") {
+            viewModel.observeDirections().observe(this, Observer {
+                commuteDistance.visibility = View.GONE
+                durationInTraffic.visibility = View.GONE
+
+                for (i in 0 until it.size) {
+                    if (it[i].travel_mode == "TRANSIT") {
+                        val lineColor = it[i].transit_details.line.color
+                        if (lineColor != null) {
+                            // Light rail and Subway lines have special route colors
+                            lineOptions = PolylineOptions().color(Color.parseColor(lineColor)).width(10f)
+                        } else {
+                            lineOptions = PolylineOptions().color(Color.CYAN).width(10f)
+                        }
+                    } else if  (it[i].travel_mode == "WALKING") {
+                        val pattern = Arrays.asList(Dot(), Gap(20f), Dash(30f), Gap(20f))
+                        lineOptions = PolylineOptions().color(Color.BLUE).pattern(pattern).width(10f)
+                    } else {
+                        lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
+                    }
+
+                    drawPoly(it[i].polyline.points, lineOptions)
+                }
+
+                initAdapter(rootView)
+                directionsAdapter.submitList(it)
+            })
+        } else {
+            viewModel.observeCurrentDistance().observe(this, Observer {
+                commuteDistance.text = "Distance: " + it
+            })
+            viewModel.observeOverviewPolyline().observe(this, Observer {
+                commuteFare.visibility = View.GONE
+                directionsRV.visibility = View.GONE
+
+                if (mode != "driving") {
+                    durationInTraffic.visibility = View.GONE
+                }
+
+                if (mode == "walking") {
+                    val pattern = Arrays.asList(Dot(), Gap(20f), Dash(30f), Gap(20f))
+                    lineOptions = PolylineOptions().color(Color.BLUE).pattern(pattern).width(10f)
+                } else {
+                    lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
+                }
+                drawPoly(it, lineOptions)
+            })
+        }
+
+        map.addMarker(MarkerOptions().position(apartmentCoords)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+        map.addMarker(MarkerOptions().position(workCoords))
+        val zoomBounds = LatLngBounds.Builder().include(apartmentCoords).include(workCoords).build()
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(zoomBounds, 100))
 
     }
 
-    private fun drawPoly(steps: DirectionsApi.Steps) {
+    private fun drawPoly(polyline: String, lineOptions: PolylineOptions) {
         var points = ArrayList<LatLng>()
-        lateinit var lineOptions: PolylineOptions
-        if (steps.travel_mode == "TRANSIT") {
-            val lineColor = steps.transit_details.line.color
-            if (lineColor != null) {
-                // Light rail and Subway lines have special route colors
-                lineOptions = PolylineOptions().color(Color.parseColor(lineColor)).width(10f)
-            } else {
-                lineOptions = PolylineOptions().color(Color.CYAN).width(10f)
-            }
-        } else if  (steps.travel_mode == "WALKING") {
-            val pattern = Arrays.asList(Dot(), Gap(20f), Dash(30f), Gap(20f))
-            lineOptions = PolylineOptions().color(Color.BLUE).pattern(pattern).width(10f)
-        } else {
-            lineOptions = PolylineOptions().color(Color.BLUE).width(10f)
-        }
-
-        var polypoints = decodePoly(steps.polyline.points)
+        var polypoints = decodePoly(polyline)
 
         for (i in 0 until polypoints.size) {
             val lat = polypoints[i].latitude

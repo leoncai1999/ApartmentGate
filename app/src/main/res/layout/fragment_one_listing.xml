@@ -85,6 +85,26 @@
             android:textSize="16dp"
             android:text="Commute Fare: " />
 
+        <TextView
+            android:id="@+id/commuteDistance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="16dp"
+            android:text="Commute Distance: " />
+
+        <TextView
+            android:id="@+id/durationInTraffic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="16dp"
+            android:text="Duration In Traffic: " />
+
         <FrameLayout
             android:id="@+id/apartmentMapFL"
             android:layout_width="match_parent"
