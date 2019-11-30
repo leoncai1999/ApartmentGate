@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:context=".MainActivity">
 
@@ -101,43 +101,38 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="2dp"
+            android:id="@+id/commuteTimeLabelTV"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/statsLayout"
-            >
+            android:layout_marginStart="14dp"
+            android:text="Commute time:"
+            android:textSize="12sp"
+            />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/commuteTimeLabelTV"
-                android:text="Commute time:"
-                android:textSize="12sp"
-                android:padding="10dp"
-                />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/commuteTimeLabelTV"
+            app:layout_constraintTop_toBottomOf="@+id/statsLayout"
+            android:layout_marginStart="8dp"
+            android:id="@+id/commuteTimeTV"
+            android:textSize="12sp"
+            />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/commuteTimeTV"
-                android:textSize="12sp"
-                android:padding="10dp"
-                />
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:layout_weight="1"
-                android:id="@+id/rowFav"
-                android:src="@drawable/ic_favorite_border_black_24dp"
-                />
-
-        </LinearLayout>
-
-
-
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/statsLayout"
+            android:paddingRight="12dp"
+            android:paddingBottom="12dp"
+            android:id="@+id/rowFav"
+            android:src="@drawable/ic_favorite_border_black_24dp"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.cardview.widget.CardView>
