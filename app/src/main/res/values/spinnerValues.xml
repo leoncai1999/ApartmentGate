@@ -7,4 +7,11 @@
         <item>45 min</item>
         <item>1 hour</item>
     </string-array>
+    <string-array name="sort_by_array">
+        <item>Price low to high</item>
+        <item>Price high to low</item>
+        <item>Size low to high</item>
+        <item>Size high to low</item>
+        <item>Commute time</item>
+    </string-array>
 </resources>
