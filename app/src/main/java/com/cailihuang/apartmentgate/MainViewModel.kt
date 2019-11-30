@@ -17,8 +17,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Query
 
 
 class MainViewModel : ViewModel() {
@@ -41,6 +43,7 @@ class MainViewModel : ViewModel() {
     private val apartmentListings = MutableLiveData<List<ApartmentListing>>().apply {
         value = mutableListOf()
     }
+    var sortBy = ""
 
     val commuteTimes = mutableMapOf<String, CommuteTimeInfo>()
 
@@ -66,7 +69,8 @@ class MainViewModel : ViewModel() {
     private var currentDurationInTraffic = MutableLiveData<String>()
 
     fun populateListings() {
-        val listingRef = db.collection("listing")
+        var listingRef = getSortFilterListingRef()
+
         val listings = mutableListOf<ApartmentListing>()
         listingRef
             .get()
@@ -77,6 +81,20 @@ class MainViewModel : ViewModel() {
                 }
                 apartmentListings.postValue(listings)
             }
+    }
+
+    private fun getSortFilterListingRef(): Query {
+        when (sortBy) {
+            "Rent low to high" -> return db.collection("listing").orderBy("rent")
+            "Rent high to low" -> return db.collection("listing").orderBy("rent", Query.Direction.DESCENDING)
+            "Size low to high" -> return db.collection("listing").orderBy("size")
+            "Size high to low" -> return db.collection("listing").orderBy("size", Query.Direction.DESCENDING)
+            "Commute time" -> println("IDK about this one yet")
+        }
+
+
+
+        return db.collection("listing")
     }
 
     fun getListings(): LiveData<List<ApartmentListing>> {
