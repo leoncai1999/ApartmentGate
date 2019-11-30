@@ -42,6 +42,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
         var addressTextView = itemView.findViewById<TextView>(R.id.addressTV)
         var rentTextView = itemView.findViewById<TextView>(R.id.rentTV)
         var bedTextView = itemView.findViewById<TextView>(R.id.bedTV)
+        var sizeTextView = itemView.findViewById<TextView>(R.id.sizeTV)
         var commuteTextView = itemView.findViewById<TextView>(R.id.commuteTimeTV)
         var favView = itemView.findViewById<ImageView>(R.id.rowFav)
 
@@ -52,6 +53,10 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             addressTextView.text = item.address2
             rentTextView.text = item.rent.toString()
             bedTextView.text = item.beds.toString()
+            if (bedTextView.text == "0") {
+                bedTextView.text = "Studio"
+            }
+            sizeTextView.text = """${item.size} sq ft"""
             commuteTextView.text = viewModel.commuteTimes.get(item.address1)?.text
 
             //println("LIST ADAPTER ITEM --- " + item.name)

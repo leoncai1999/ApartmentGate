@@ -68,7 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"
-                    android:src="@drawable/ic_star_black_24dp"
+                    android:src="@drawable/ic_money_black_24dp"
                     />
                 <TextView
                     android:id="@+id/rentTV"
@@ -88,10 +88,31 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"
-                    android:src="@drawable/ic_directions_bike_black_24dp"
+                    android:src="@drawable/ic_bed_black_24dp"
                     />
                 <TextView
                     android:id="@+id/bedTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="12dp"
+                    android:gravity="center"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                >
+                <TextView
+                    android:id="@+id/size_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Size:"
+                    android:layout_margin="12dp"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:id="@+id/sizeTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"

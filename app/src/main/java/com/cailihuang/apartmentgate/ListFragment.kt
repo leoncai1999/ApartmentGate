@@ -7,10 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
@@ -24,8 +20,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_list.*
-import android.widget.AdapterView
-
+import android.content.res.Resources
+import android.widget.*
 
 class ListFragment: Fragment() {
     private lateinit var viewModel: MainViewModel
@@ -46,7 +42,7 @@ class ListFragment: Fragment() {
         rv.layoutManager = LinearLayoutManager(context)
     }
 
-    private fun initializeLayoutElems() {
+    private fun initializeLayoutElems(root: View) {
         ArrayAdapter.createFromResource(
             context!!,
             R.array.sort_by_array,
@@ -55,25 +51,24 @@ class ListFragment: Fragment() {
             // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             // Apply the adapter to the spinner
-            sortSpinner.adapter = adapter
+            root.findViewById<Spinner>(R.id.sortSpinner).adapter = adapter
         }
 
-        sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        root.findViewById<Spinner>(R.id.sortSpinner).onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // do nothing
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                when (position) {
-                    0 -> {
-                        println("sort by da da da")
-                    }
-                    1 -> println("etc")
-                }
+                val res: Resources = resources
+                val sortByArray = res.getStringArray(R.array.sort_by_array)
+                viewModel.sortBy = sortByArray[position]
+                println("WHATS THE SORT ???" + viewModel.sortBy)
+                viewModel.populateListings()
             }
         }
 
-        filtersButton.setOnClickListener {
+        root.findViewById<Button>(R.id.filtersButton).setOnClickListener {
             // launch new filters fragment probably
         }
     }
@@ -91,6 +86,7 @@ class ListFragment: Fragment() {
 
         initAdapter(root)
         viewModel.populateFavorites()
+        initializeLayoutElems(root)
 
         // Used to convert Cloud Firestore string fields to Int so that they're sortable
         //convertFirestoreStringToInts()
