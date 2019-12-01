@@ -2,23 +2,16 @@ package com.cailihuang.apartmentgate
 
 import android.media.Image
 import android.os.Bundle
-import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_list.*
 import android.content.res.Resources
 import android.widget.*
@@ -26,7 +19,6 @@ import android.widget.*
 class ListFragment: Fragment() {
     private lateinit var viewModel: MainViewModel
     private lateinit var listAdapter: ListingAdapter
-    private lateinit var ref: DatabaseReference
 
     companion object {
         fun newInstance(): ListFragment {
@@ -63,13 +55,16 @@ class ListFragment: Fragment() {
                 val res: Resources = resources
                 val sortByArray = res.getStringArray(R.array.sort_by_array)
                 viewModel.sortBy = sortByArray[position]
-                println("WHATS THE SORT ???" + viewModel.sortBy)
                 viewModel.populateListings()
             }
         }
 
         root.findViewById<Button>(R.id.filtersButton).setOnClickListener {
-            // launch new filters fragment probably
+            fragmentManager!!
+                .beginTransaction()
+                .replace(R.id.main_frame, FiltersFragment.newInstance())
+                .addToBackStack(null)
+                .commit()
         }
     }
 
@@ -78,6 +73,7 @@ class ListFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         viewModel = activity?.run {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")

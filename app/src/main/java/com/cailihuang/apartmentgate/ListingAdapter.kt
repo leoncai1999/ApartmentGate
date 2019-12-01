@@ -12,12 +12,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
-import java.util.concurrent.Semaphore
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
@@ -51,7 +45,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
 
             nameTextView.text = item.address1
             addressTextView.text = item.address2
-            rentTextView.text = item.rent.toString()
+            rentTextView.text =  """$${item.rent}"""
             bedTextView.text = item.beds.toString()
             if (bedTextView.text == "0") {
                 bedTextView.text = "Studio"
@@ -59,10 +53,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             sizeTextView.text = """${item.size} sq ft"""
             commuteTextView.text = viewModel.commuteTimes.get(item.address1)?.text
 
-            //println("LIST ADAPTER ITEM --- " + item.name)
-
             if (viewModel.isFav(item)) {
-                println("ITEM IS FAV --- " + item.address1)
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)
             }
 
@@ -70,19 +61,14 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))
             }
 
-            // favorites
             favView.setOnClickListener{
                 val position = adapterPosition
                 val listing = getItem(position)
                 // Toggle Favorite
                 if (viewModel.isFav(listing)) {
-                    println("REMOVE FAV ITEM --- " + item.address1)
-
                     viewModel.removeFav(listing)
                     viewModel.updateTrendingNeighborhoods(listing, true)
                 } else {
-                    println("ADD FAV ITEM --- " + item.address1)
-
                     viewModel.addFav(listing)
                     viewModel.updateTrendingNeighborhoods(listing, false)
                 }

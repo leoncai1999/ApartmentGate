@@ -20,29 +20,23 @@ class WelcomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_welcome)
 
         signInButton.setOnClickListener {
-            // TODO verify input not null, hide password
+            if (emailET.text.isEmpty() || passwordET.text.isEmpty()) {
+                Toast.makeText(this, "You must enter your email and password.", Toast.LENGTH_LONG).show()
+            } else {
+                // TODO make password hidden
+                // in activity_welcome, passwordET android:password="true"
 
-            var fbAuth = FirebaseAuth.getInstance()
-
-            fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
-                if (task.isSuccessful) {
-
-
-
-                    val mainActivityIntent = Intent(this, MainActivity::class.java)
-                    startActivity(mainActivityIntent)
-
-
-
-                } else {
-                    Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
-                }
-            })
-
-
-
+                var fbAuth = FirebaseAuth.getInstance()
+                fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
+                    if (task.isSuccessful) {
+                        val mainActivityIntent = Intent(this, MainActivity::class.java)
+                        startActivity(mainActivityIntent)
+                    } else {
+                        Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
+                    }
+                })
+            }
         }
-
 
         createAccountText.setOnClickListener {
             val createAccountIntent = Intent(this, CreateAccountActivity::class.java)

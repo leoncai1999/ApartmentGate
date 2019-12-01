@@ -54,6 +54,18 @@ class ProfileFragment: Fragment() {
                     val profile = document.toObject(UserProfile::class.java)
 
                     initializeLayoutElems()
+
+                    val commuteSpinnerAdapter = ArrayAdapter.createFromResource(
+                        context!!,
+                        R.array.commute_array,
+                        android.R.layout.simple_spinner_item
+                    ).also { adapter ->
+                        // Specify the layout to use when the list of choices appears
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        // Apply the adapter to the spinner
+                        commuteTimeSpinner.adapter = adapter
+                    }
+
                     changeProfileButton.setOnClickListener {
                         if (newEmailET.text.isNotEmpty()) {
                             profile?.email = newEmailET.text.toString()
@@ -88,17 +100,12 @@ class ProfileFragment: Fragment() {
                     budgetET.hint = profile.budget.toString()
                     sizeET.hint = profile.size.toString()
 
+                    commuteTimeSpinner.setSelection(commuteSpinnerAdapter.getPosition(profile.maxCommuteTime))
+
                     preferredTransport = profile.transportation
                     walkability = profile.walkability
                     demographic = profile.demographic
 
-                    when (profile.maxCommuteTime) {
-                        "10 min" -> commuteTimeSpinner.setSelection(0)
-                        "15 min" -> commuteTimeSpinner.setSelection(1)
-                        "30 min" -> commuteTimeSpinner.setSelection(2)
-                        "45 min" -> commuteTimeSpinner.setSelection(3)
-                        "1 hour" -> commuteTimeSpinner.setSelection(4)
-                    }
                     when (profile.transportation) {
                         "car" -> ViewCompat.setBackgroundTintList(carButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
                         "transit" -> ViewCompat.setBackgroundTintList(transitButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
@@ -183,17 +190,6 @@ class ProfileFragment: Fragment() {
             walkability = "carealot"
             //changeButtonsColors(careAlotButton, dontCareButton, careButton)
             ViewCompat.setBackgroundTintList(careAlotButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
-        }
-
-        ArrayAdapter.createFromResource(
-            context!!,
-            R.array.commute_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            commuteTimeSpinner.adapter = adapter
         }
     }
 

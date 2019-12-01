@@ -43,7 +43,12 @@ class MainViewModel : ViewModel() {
     private val apartmentListings = MutableLiveData<List<ApartmentListing>>().apply {
         value = mutableListOf()
     }
+
     var sortBy = ""
+    var rentLimit = 0
+    var minSize = 0
+    var minBeds = 0
+    var commuteTimeLimit = ""
 
     private var neighborhoods = MutableLiveData<List<Neighborhood>>().apply {
         value = mutableListOf()
@@ -72,8 +77,10 @@ class MainViewModel : ViewModel() {
     private var currentDistance = MutableLiveData<String>()
     private var currentDurationInTraffic = MutableLiveData<String>()
 
+
     fun populateListings() {
-        var listingRef = getSortFilterListingRef()
+        val listingRefFiltered = getFilterListingRef()
+        val listingRef = getSortListingRef(listingRefFiltered)
 
         val listings = mutableListOf<ApartmentListing>()
         listingRef
@@ -87,18 +94,40 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    private fun getSortFilterListingRef(): Query {
+    private fun getSortListingRef(listingRefFiltered: Query): Query {
         when (sortBy) {
-            "Rent low to high" -> return db.collection("listing").orderBy("rent")
-            "Rent high to low" -> return db.collection("listing").orderBy("rent", Query.Direction.DESCENDING)
-            "Size low to high" -> return db.collection("listing").orderBy("size")
-            "Size high to low" -> return db.collection("listing").orderBy("size", Query.Direction.DESCENDING)
+            "Rent low to high" -> return listingRefFiltered.orderBy("rent")
+            "Rent high to low" -> return listingRefFiltered.orderBy("rent", Query.Direction.DESCENDING)
+            "Size low to high" -> return listingRefFiltered.orderBy("size")
+            "Size high to low" -> return listingRefFiltered.orderBy("size", Query.Direction.DESCENDING)
             "Commute time" -> println("IDK about this one yet")
         }
 
+        return listingRefFiltered
+    }
 
+    private fun getFilterListingRef(): Query {
+        if (rentLimit != 0) {
+            return db.collection("listing").whereLessThanOrEqualTo("rent", rentLimit).orderBy("rent")
+        }
+        if (minSize != 0) {
+            return db.collection("listing").whereGreaterThanOrEqualTo("size", minSize).orderBy("size")
+        }
+        if (minBeds != 0) {
+            return db.collection("listing").whereGreaterThanOrEqualTo("beds", minBeds).orderBy("beds")
+        }
+        when (commuteTimeLimit) {
+            "10 min" -> println("Haven't figured this one out yet")
+        }
 
         return db.collection("listing")
+    }
+
+    fun resetFilters() {
+        rentLimit = 0
+        minSize = 0
+        minBeds = 0
+        commuteTimeLimit = ""
     }
 
     fun getListings(): LiveData<List<ApartmentListing>> {
