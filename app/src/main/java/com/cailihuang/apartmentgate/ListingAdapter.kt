@@ -73,15 +73,18 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             // favorites
             favView.setOnClickListener{
                 val position = adapterPosition
+                val listing = getItem(position)
                 // Toggle Favorite
-                if (viewModel.isFav(getItem(position))) {
+                if (viewModel.isFav(listing)) {
                     println("REMOVE FAV ITEM --- " + item.address1)
 
-                    viewModel.removeFav(getItem(position))
+                    viewModel.removeFav(listing)
+                    viewModel.updateTrendingNeighborhoods(listing, true)
                 } else {
                     println("ADD FAV ITEM --- " + item.address1)
 
-                    viewModel.addFav(getItem(position))
+                    viewModel.addFav(listing)
+                    viewModel.updateTrendingNeighborhoods(listing, false)
                 }
                 notifyItemChanged(position)
             }

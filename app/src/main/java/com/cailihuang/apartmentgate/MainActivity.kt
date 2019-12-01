@@ -21,21 +21,18 @@ class MainActivity : AppCompatActivity() {
         navigationView.setOnNavigationItemSelectedListener {item ->
             when (item.itemId) {
                 R.id.navigation_search -> {
-                    println("search pressed")
                     setFragment(MapFragment.newInstance())
                     true
                 }
                 R.id.navigation_popular -> {
-                    println("popular pressed")
+                    setFragment(TrendingFragment.newInstance())
                     true
                 }
                 R.id.navigation_favorites -> {
-                    println("favorites pressed")
                     setFragment(FavoritesFragment.newInstance())
                     true
                 }
                 R.id.navigation_profile -> {
-                    println("profile pressed")
                     setFragment(ProfileFragment.newInstance())
                     true
                 }

@@ -45,6 +45,10 @@ class MainViewModel : ViewModel() {
     }
     var sortBy = ""
 
+    private var neighborhoods = MutableLiveData<List<Neighborhood>>().apply {
+        value = mutableListOf()
+    }
+
     val commuteTimes = mutableMapOf<String, CommuteTimeInfo>()
 
     private val workAddress = MutableLiveData<String>().apply {
@@ -99,6 +103,24 @@ class MainViewModel : ViewModel() {
 
     fun getListings(): LiveData<List<ApartmentListing>> {
         return apartmentListings
+    }
+
+    fun populateNeighborhoods() {
+        var neighbhoodRef = db.collection("Neighborhoods").orderBy("favorites", Query.Direction.DESCENDING)
+        val cityNeighborhoods = mutableListOf<Neighborhood>()
+        neighbhoodRef.get().addOnSuccessListener { result ->
+            for (document in result) {
+                val neighborhood = document.toObject(Neighborhood::class.java)
+                println(neighborhood.toString())
+                cityNeighborhoods.add(neighborhood)
+            }
+            println("list to post is: " + cityNeighborhoods.toString())
+            neighborhoods.postValue(cityNeighborhoods)
+        }
+    }
+
+    fun getNeighborhoods(): LiveData<List<Neighborhood>> {
+        return neighborhoods
     }
 
     fun setWorkAddress(address: String) {
@@ -246,6 +268,48 @@ class MainViewModel : ViewModel() {
 
     fun getFav(): LiveData<List<ApartmentListing>> {
         return favListings
+    }
+
+    fun updateTrendingNeighborhoods(listing: ApartmentListing, isRemove: Boolean) {
+        // forward slash character must be escaped for database
+        val listingNeighborhood = listing.neighborhood.replace("/", " & ")
+        val neighborhoodRef = db.collection("Neighborhoods").document(listingNeighborhood)
+        neighborhoodRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                var favoriteCount = document.toObject(Neighborhood::class.java)!!.favorites
+                var newFavoriteCount = 0
+                /* A neighborhood's averageRent is the aggregate of all favorited listings matching
+                that neighborhood among all users */
+                var averageRent = document.toObject(Neighborhood::class.java)!!.average_rent
+                var newAverageRent = 0
+                if (isRemove) {
+                    newFavoriteCount = favoriteCount - 1
+                    if (newFavoriteCount == 0) {
+                        neighborhoodRef.delete()
+                    } else {
+                        newAverageRent = (averageRent*favoriteCount - listing.rent)/newFavoriteCount
+                        neighborhoodRef.update("favorites", newFavoriteCount)
+                        neighborhoodRef.update("average_rent", newAverageRent)
+                    }
+                } else {
+                    newFavoriteCount = favoriteCount + 1
+                    newAverageRent = (averageRent*favoriteCount + listing.rent)/newFavoriteCount
+                    neighborhoodRef.update("favorites", newFavoriteCount)
+                    neighborhoodRef.update("average_rent", newAverageRent)
+                }
+            } else {
+                /* Scenario where the the neighborhood hasn't previously being seen in a
+                favorited listing before */
+                val neighborhoodData = hashMapOf(
+                        "average_rent" to listing.rent,
+                        "favorites" to 1,
+                        // TODO: Find a way to get unique images for each neighborhood
+                        "image_url" to "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/San_Francisco_%285222422754%29_%282%29.jpg/640px-San_Francisco_%285222422754%29_%282%29.jpg?1575182093536",
+                        "name" to listing.neighborhood
+                )
+                neighborhoodRef.set(neighborhoodData)
+            }
+        }
     }
 
 }
