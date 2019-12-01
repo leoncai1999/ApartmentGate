@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import android.widget.Toast
+import java.util.concurrent.Semaphore
 
 
 class WelcomeActivity : AppCompatActivity() {
@@ -27,22 +28,15 @@ class WelcomeActivity : AppCompatActivity() {
             fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
                 if (task.isSuccessful) {
 
-
-
                     val mainActivityIntent = Intent(this, MainActivity::class.java)
                     startActivity(mainActivityIntent)
-
-
 
                 } else {
                     Toast.makeText(this, "Login failed.", Toast.LENGTH_LONG).show()
                 }
             })
 
-
-
         }
-
 
         createAccountText.setOnClickListener {
             val createAccountIntent = Intent(this, CreateAccountActivity::class.java)

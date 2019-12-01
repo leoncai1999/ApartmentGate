@@ -47,8 +47,6 @@ import java.util.concurrent.Semaphore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
