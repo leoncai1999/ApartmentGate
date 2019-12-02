@@ -32,6 +32,7 @@ import kotlin.collections.ArrayList
 import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Dot
+import java.text.SimpleDateFormat
 
 class OneListingFragment : Fragment(), OnMapReadyCallback {
 
@@ -40,7 +41,6 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var rootView: View
     private lateinit var directionsAdapter: DirectionsListAdapter
-    private val mode = "transit"
 
     companion object {
         fun newInstance(listing: ApartmentListing): OneListingFragment {
@@ -165,7 +165,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
         val fullAddress = listing!!.address1.substringBefore(" Unit") + ", " + listing.address2
         val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+        val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
         val apartmentCoords = LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude)
         val workCoords = LatLng(workAddress[0].latitude, workAddress[0].longitude)
 
@@ -175,8 +175,25 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
         val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
-        // TODO: Pass in user's desired mode of transit
-        viewModel.fetchDirections(origin, destination, mode, APIKeys.googleMapsAPIKey)
+
+        val mode = viewModel.currentUserProfile.transportation
+        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+        if (workStartMinString == "0") {
+            workStartMinString += "0"
+        }
+        // add 8 hours to conver to UTC
+        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
+
+        println(" WHAT IS THE STRING ??? " + workStartHourString)
+        if (workStartHourString.length == 1) {
+            workStartHourString = "0" + workStartHourString
+        }
+        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
+        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
+        val date = df.parse(arrivalTimeString)
+        val epoch = date.time / 1000
+
+        viewModel.fetchDirections(origin, destination, mode, epoch.toString(),APIKeys.googleMapsAPIKey)
 
         val apartmentCommuteTimeTV = rootView.findViewById<TextView>(R.id.apartmentCommuteTime)
         val apartmentCommuteFareTV = rootView.findViewById<TextView>(R.id.apartmentCommuteFare)

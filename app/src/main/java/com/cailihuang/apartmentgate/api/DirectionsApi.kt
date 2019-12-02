@@ -14,7 +14,8 @@ interface DirectionsApi {
 
     @GET("/maps/api/directions/json?&sensor=false")
     fun getDirections(@Query("origin") origin: String, @Query("destination")
-    destination: String, @Query("mode") mode: String, @Query("key") key: String): Call<DirectionsQuery>
+    destination: String, @Query("mode") mode: String, @Query("arrival_time") arrival_time: String,
+                      @Query("key") key: String): Call<DirectionsQuery>
 
     class DirectionsQuery (
             val geocoded_waypoints : List<Geocoded_waypoints>,

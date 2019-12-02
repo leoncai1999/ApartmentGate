@@ -27,11 +27,25 @@ class MainViewModel : ViewModel() {
 
     lateinit var db: FirebaseFirestore
     lateinit var userRef: DocumentReference
+    lateinit var currentUserProfile: UserProfile
 
     fun initFirestore() {
         db = FirebaseFirestore.getInstance()
         val user = FirebaseAuth.getInstance().currentUser!!
         userRef = db.collection("Users").document(user.uid)
+
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
+                    currentUserProfile = document.toObject(UserProfile::class.java)!!
+                } else {
+                    Log.d("CLOUD FIRESTORE", "No such document")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("CLOUD FIRESTORE", "get failed with ", exception)
+            }
     }
 
     private var favListings = MutableLiveData<List<ApartmentListing>>().apply {
@@ -192,11 +206,11 @@ class MainViewModel : ViewModel() {
         return currentHowLoudScore
     }
 
-    fun fetchDirections(origin: String, destination: String, mode: String, key: String) {
+    fun fetchDirections(origin: String, destination: String, mode: String, arrivalTime: String, key: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
                         + Dispatchers.IO) {
-            val callResponse = directionsRepository.getDirections(origin, destination, mode, key)
+            val callResponse = directionsRepository.getDirections(origin, destination, mode, arrivalTime, key)
             val response = callResponse.execute()
             if (response.isSuccessful) {
                 currentCommuteTime.postValue(response.body()!!.routes[0].legs[0].duration.text)

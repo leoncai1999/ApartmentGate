@@ -57,55 +57,55 @@ class CreateAccountActivity : AppCompatActivity() {
         // TODO reset color when another option selected
 
         carButton.setOnClickListener {
-            preferredTransport = "car"
-            //changeButtonsColors(carButton, transitButton, walkButton, bikeButton)
+            preferredTransport = "driving"
+            changeButtonsColors(carButton, transitButton, walkButton, bikeButton)
             ViewCompat.setBackgroundTintList(carButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         transitButton.setOnClickListener {
             preferredTransport = "transit"
-            //changeButtonsColors(transitButton, carButton, walkButton, bikeButton)
+            changeButtonsColors(transitButton, carButton, walkButton, bikeButton)
             ViewCompat.setBackgroundTintList(transitButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         walkButton.setOnClickListener {
-            preferredTransport = "walk"
-            //changeButtonsColors(walkButton, carButton, transitButton, bikeButton)
+            preferredTransport = "walking"
+            changeButtonsColors(walkButton, carButton, transitButton, bikeButton)
             ViewCompat.setBackgroundTintList(walkButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         bikeButton.setOnClickListener {
-            preferredTransport = "bike"
-            //changeButtonsColors(bikeButton, walkButton, carButton, transitButton)
+            preferredTransport = "bicycling"
+            changeButtonsColors(bikeButton, walkButton, carButton, transitButton)
             ViewCompat.setBackgroundTintList(bikeButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
         familiesButton.setOnClickListener {
             demographic = "families"
-            //changeButtonsColors(familiesButton, professionalsButton, retireesButton)
+            changeButtonsColors(familiesButton, professionalsButton, retireesButton)
             ViewCompat.setBackgroundTintList(familiesButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         professionalsButton.setOnClickListener {
             demographic = "professionals"
-            //changeButtonsColors(professionalsButton, familiesButton, retireesButton)
+            changeButtonsColors(professionalsButton, familiesButton, retireesButton)
             ViewCompat.setBackgroundTintList(professionalsButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         retireesButton.setOnClickListener {
             demographic = "retirees"
-            //changeButtonsColors(retireesButton, familiesButton, professionalsButton)
+            changeButtonsColors(retireesButton, familiesButton, professionalsButton)
             ViewCompat.setBackgroundTintList(retireesButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
         dontCareButton.setOnClickListener {
             walkability = "dontcare"
-            //changeButtonsColors(dontCareButton, careButton, careAlotButton)
+            changeButtonsColors(dontCareButton, careButton, careAlotButton)
             ViewCompat.setBackgroundTintList(dontCareButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         careButton.setOnClickListener {
             walkability = "care"
-            //changeButtonsColors(careButton, dontCareButton, careAlotButton)
+            changeButtonsColors(careButton, dontCareButton, careAlotButton)
             ViewCompat.setBackgroundTintList(careButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         careAlotButton.setOnClickListener {
             walkability = "carealot"
-            //changeButtonsColors(careAlotButton, dontCareButton, careButton)
+            changeButtonsColors(careAlotButton, dontCareButton, careButton)
             ViewCompat.setBackgroundTintList(careAlotButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
@@ -121,12 +121,11 @@ class CreateAccountActivity : AppCompatActivity() {
         }
     }
 
-//    private fun changeButtonsColors(selectedButton: Button, otherButton1: Button, otherButton2: Button, otherButton3: Button? = null) {
-//        otherButton1.setBackground(createProfileButton.background)
-//        otherButton2.setBackground(createProfileButton.background)
-//        otherButton3?.setBackground(createProfileButton.background)
-//        ViewCompat.setBackgroundTintList(selectedButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
-//    }
+    private fun changeButtonsColors(selectedButton: Button, otherButton1: Button, otherButton2: Button, otherButton3: Button? = null) {
+        otherButton1.setBackground(createProfileButton.background)
+        otherButton2.setBackground(createProfileButton.background)
+        otherButton3?.setBackground(createProfileButton.background)
+    }
 
     private fun createNewAccount() {
         // TODO check if fields are empty
