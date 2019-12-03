@@ -110,9 +110,13 @@ class MainViewModel : ViewModel() {
         listingRef
             .get()
             .addOnSuccessListener { result ->
+                var count = 0
                 for (document in result) {
-                    val aListing = document.toObject(ApartmentListing::class.java)
-                    listings.add(aListing)
+                    if (count < 100) {
+                        val aListing = document.toObject(ApartmentListing::class.java)
+                        listings.add(aListing)
+                        count++
+                    }
                 }
                 apartmentListings.postValue(listings)
             }
@@ -120,11 +124,12 @@ class MainViewModel : ViewModel() {
 
     private fun getSortListingRef(listingRefFiltered: Query): Query {
         when (sortBy) {
+            "Score" -> return listingRefFiltered.orderBy("score", Query.Direction.DESCENDING)
             "Rent low to high" -> return listingRefFiltered.orderBy("rent")
             "Rent high to low" -> return listingRefFiltered.orderBy("rent", Query.Direction.DESCENDING)
             "Size low to high" -> return listingRefFiltered.orderBy("size")
             "Size high to low" -> return listingRefFiltered.orderBy("size", Query.Direction.DESCENDING)
-            "Commute time" -> println("IDK about this one yet")
+            "Commute time" -> println("IDK about this one yet") // TODO probably take this out
         }
 
         return listingRefFiltered

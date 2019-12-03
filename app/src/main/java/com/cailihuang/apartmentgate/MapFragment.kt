@@ -37,7 +37,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.cailihuang.apartmentgate.api.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
+import com.google.gson.annotations.SerializedName
 import kotlinx.android.synthetic.main.user_profile_information.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,7 +68,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var fireInitSema = Semaphore(1)
 
     // Right now, all of the commute times must be retrieved before you launch the list
-    private val gotCommuteTimesSema = Semaphore(1)
+
+    data class UserID (
+        @field:SerializedName("userid")
+        var userid: String = "")
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -96,7 +101,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         listButton.setOnClickListener {
-            gotCommuteTimesSema.acquire()
             (activity as MainActivity).setFragment(ListFragment.newInstance())
         }
     }
@@ -104,8 +108,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         fireInitSema.acquire()
         map = googleMap
-
-        gotCommuteTimesSema.acquire()
 
         // start map at center of San Francisco
         val startLocation = LatLng(37.775453, -122.439660)
@@ -163,38 +165,49 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 //            }
 
         // Set the ApartmentGate score for each listing
-        val listingRef = viewModel.db.collection("listing")
-        listingRef
-            .get()
-            .addOnSuccessListener { result ->
-                println("YOLO")
-                for (document in result) {
-                    Log.d("LISTING", "${document.id} => ${document.data}")
-                    val aListing = document.toObject(ApartmentListing::class.java)
 
-
-
-                    aListing.AGScore = calculateApartmentScore(aListing)
-                    val docRef = viewModel.db.collection("listing").document(document.id)
-                    //docRef.set(aListing)
-                    docRef.update("agscore", aListing.AGScore)
-
-                    // Remove the 'capital' field from the document
-
-
-                }
+        val lastUserIdRef = viewModel.db.collection("LastUser").document("lastuser")
+        lastUserIdRef.get().addOnSuccessListener { document ->
+            val lastUserID = document.toObject(UserID::class.java)!!.userid
+            val currentUser = FirebaseAuth.getInstance().currentUser!!.uid
+            println("currentUser id is: " + currentUser)
+            println("lastUser id is: " + lastUserID)
+            if (currentUser != lastUserID) {
+                val listingRef = viewModel.db.collection("listing")
+                listingRef
+                    .get()
+                    .addOnSuccessListener { result ->
+                        for (document in result) {
+                            Log.d("LISTING", "${document.id} => ${document.data}")
+                            val aListing = document.toObject(ApartmentListing::class.java)
+                            aListing.AGScore = calculateApartmentScore(aListing)
+                            val docRef = viewModel.db.collection("listing").document(document.id)
+                            docRef.update("agscore", aListing.AGScore)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("LISTING", "Error getting documents: ", exception)
+                    }
+                lastUserIdRef.update("userid", currentUser)
             }
-            .addOnFailureListener { exception ->
-                Log.d("LISTING", "Error getting documents: ", exception)
-            }
-
+        }
 
         viewModel.populateListings()
 
         viewModel.getListings().observe(this, Observer { apartments ->
             for (i in 0 until apartments.size) {
 
-                viewModel.db.collection("listing").document()
+                val apartment = apartments[i]
+                val fullAddress = apartments[i].address1.substringBefore(" Unit") + ", " + apartments[i].address2
+
+                val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+                map.setInfoWindowAdapter(markerInfoWindow)
+
+                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
+                val marker = map.addMarker(MarkerOptions().position(LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude))
+                    .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                marker.tag = apartment
+                marker.showInfoWindow()
 
             }
         })
@@ -203,100 +216,108 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         fireInitSema.release()
 
-        val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
-        ref.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                var count = 0
 
-                 val uiScope = CoroutineScope(Dispatchers.Main + Job())
 
-                var commuteTime = CommuteTimeInfo()
-                val commuteListingSema = Semaphore(1)
 
-                for (productSnapshot in dataSnapshot.children) {
-                    if (count < 0) { // temporary solution
-                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
-//                        listings.add(apartment!!)
-//                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
-//                        map.setInfoWindowAdapter(markerInfoWindow)
-
-//                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
-//                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-
-                        val address = geocoder.getFromLocationName(apartment!!.address1, 1)
-                        val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-                            .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-                        marker.tag = apartment
-                        marker.showInfoWindow()
-
-//                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
-//                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
-
-//                        commuteListingSema.acquire()
+//        val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
+//        ref.addValueEventListener(object : ValueEventListener {
+//            override fun onDataChange(dataSnapshot: DataSnapshot) {
+//                var count = 0
 //
-//                        uiScope.launch(
-//                            context = uiScope.coroutineContext
-//                                    + Dispatchers.IO) {
-//                            // Update LiveData from IO dispatcher, use postValue
+//                 val uiScope = CoroutineScope(Dispatchers.Main + Job())
 //
-//                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+//                var commuteTime = CommuteTimeInfo()
+//                val commuteListingSema = Semaphore(1)
 //
-//                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
-//                            commuteListingSema.release()
+//                for (productSnapshot in dataSnapshot.children) {
+//                    if (count < 0) { // temporary solution
+//                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
+////                        listings.add(apartment!!)
+////                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+////                        map.setInfoWindowAdapter(markerInfoWindow)
+//
+////                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
+////                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+//
+//                        val address = geocoder.getFromLocationName(apartment!!.address1, 1)
+//                        val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
+//                            .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+//                        marker.tag = apartment
+//                        marker.showInfoWindow()
+//
+////                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
+////                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
+//
+////                        commuteListingSema.acquire()
+////
+////                        uiScope.launch(
+////                            context = uiScope.coroutineContext
+////                                    + Dispatchers.IO) {
+////                            // Update LiveData from IO dispatcher, use postValue
+////
+////                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+////
+////                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
+////                            commuteListingSema.release()
+////                        }
+////
+////                        commuteListingSema.acquire()
+////                        commuteListingSema.release()
+//
+//                        val mode = viewModel.currentUserProfile.transportation
+//                        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+//                        if (workStartMinString == "0") {
+//                            workStartMinString += "0"
 //                        }
+//                        // add 8 hours to conver to UTC
+//                        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
 //
-//                        commuteListingSema.acquire()
-//                        commuteListingSema.release()
-
-                        val mode = viewModel.currentUserProfile.transportation
-                        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
-                        if (workStartMinString == "0") {
-                            workStartMinString += "0"
-                        }
-                        // add 8 hours to conver to UTC
-                        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
-
-                        println(" WHAT IS THE STRING ??? " + workStartHourString)
-                        if (workStartHourString.length == 1) {
-                            workStartHourString = "0" + workStartHourString
-                        }
-                        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
-                        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
-                        val date = df.parse(arrivalTimeString)
-                        val epoch = date.time / 1000
-
-//                        viewModel.fetchDirections("37.779020,-122.479290", "37.792422,-122.406252", mode, epoch.toString(), APIKeys.googleMapsAPIKey)
-//                        viewModel.observeCommuteTime().observe(this, Observer {
-//                            commuteTime = it
-//                        })
-
-
-                        Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
-
-                        //viewModel.commuteTimes.put(apartment.address1, commuteTime)
-
-                        count++
-                    }
-                }
-
-                //val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-                //map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
-
-                gotCommuteTimesSema.release()
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                throw databaseError.toException()
-            }
-        })
+//                        println(" WHAT IS THE STRING ??? " + workStartHourString)
+//                        if (workStartHourString.length == 1) {
+//                            workStartHourString = "0" + workStartHourString
+//                        }
+//                        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
+//                        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
+//                        val date = df.parse(arrivalTimeString)
+//                        val epoch = date.time / 1000
+//
+////                        viewModel.fetchDirections("37.779020,-122.479290", "37.792422,-122.406252", mode, epoch.toString(), APIKeys.googleMapsAPIKey)
+////                        viewModel.observeCommuteTime().observe(this, Observer {
+////                            commuteTime = it
+////                        })
+//
+//
+//                        Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
+//
+//                        //viewModel.commuteTimes.put(apartment.address1, commuteTime)
+//
+//                        count++
+//                    }
+//                }
+//
+//                //val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+//                //map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+//            }
+//
+//            override fun onCancelled(databaseError: DatabaseError) {
+//                throw databaseError.toException()
+//            }
+//        })
 
         map.setOnInfoWindowClickListener {
             // the on click listener is applied to the whole marker dialog because there is no
             // easy way to only have an on click listener for the get details button. We can look
             // into a workaround or 3rd party library later to address this
-
-            // TODO: Query data instead of using helper function below for efficiency purposes
-            (activity as MainActivity).setFragment(OneListingFragment.newInstance(getListingFromTitle(it.title)))
+            var apartmentListing: ApartmentListing
+            viewModel.db.collection("listing")
+                .whereEqualTo("address1", it.title)
+                .get()
+                .addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        apartmentListing = document.toObject(ApartmentListing::class.java)
+                        (activity as MainActivity).setFragment(OneListingFragment.newInstance(apartmentListing))
+                    }
+                }
         }
     }
 
@@ -387,8 +408,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         var affordabilityScore = 100
         val idealRent = userProfile.budget
         if (idealRent < listing.rent) {
-            val pointCost = idealRent / 100
+            var pointCost = idealRent / 100
+            if (pointCost <= 0) {
+                pointCost = 1
+            }
             affordabilityScore -= (listing.rent - idealRent) / pointCost
+        }
+
+        if (affordabilityScore < 0) {
+            affordabilityScore = 0
         }
 
         // Component 5: Size

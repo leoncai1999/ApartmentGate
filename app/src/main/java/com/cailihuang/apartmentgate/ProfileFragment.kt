@@ -1,5 +1,6 @@
 package com.cailihuang.apartmentgate
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -89,6 +90,15 @@ class ProfileFragment: Fragment() {
                         }
 
                         userRef.set(profile!!)
+                        val lastUserIdRef = viewModel.db.collection("LastUser").document("lastuser")
+                        lastUserIdRef.update("userid", "")
+                        (activity as MainActivity).setFragment(MapFragment.newInstance())
+                    }
+
+                    signOutButton.setOnClickListener {
+                        FirebaseAuth.getInstance().signOut()
+                        val welcomeIntent = Intent(context, WelcomeActivity::class.java)
+                        startActivity(welcomeIntent)
                     }
 
                     newEmailET.hint = profile?.email

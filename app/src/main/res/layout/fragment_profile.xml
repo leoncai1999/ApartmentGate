@@ -17,9 +17,9 @@
             android:layout_marginTop="16dp"/>
 
         <include
+            layout="@layout/user_profile_information"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/user_profile_information" />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:orientation="horizontal" android:layout_width="match_parent"
@@ -35,6 +35,31 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Change Profile"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="20dp"
+                android:layout_weight="1"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal" android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <Button
+                android:id="@+id/signOutButton"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Sign Out"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="20dp"
                 android:layout_weight="1"/>
