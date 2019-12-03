@@ -37,6 +37,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.cailihuang.apartmentgate.api.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.firebase.firestore.FieldValue
 import kotlinx.android.synthetic.main.user_profile_information.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,8 +61,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
 
-
     private var listings = mutableListOf<ApartmentListing>()
+
+    private var fireInitSema = Semaphore(1)
 
     // Right now, all of the commute times must be retrieved before you launch the list
     private val gotCommuteTimesSema = Semaphore(1)
@@ -71,15 +73,21 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_map, container, false)
 
+        fireInitSema.acquire()
+
         viewModel = activity?.run {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
-        
+
+        println("DOES IT GET HERE??? AHHHHHHHHH")
+
         viewModel.initFirestore()
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFrag) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
         geocoder = Geocoder(activity, Locale.getDefault())
+
+        fireInitSema.release()
 
         return rootView
     }
@@ -94,6 +102,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
+        fireInitSema.acquire()
         map = googleMap
 
         gotCommuteTimesSema.acquire()
@@ -168,7 +177,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     aListing.AGScore = calculateApartmentScore(aListing)
                     val docRef = viewModel.db.collection("listing").document(document.id)
                     //docRef.set(aListing)
-                    docRef.update("AGScore", 69)
+                    docRef.update("agscore", aListing.AGScore)
+
+                    // Remove the 'capital' field from the document
+
+
                 }
             }
             .addOnFailureListener { exception ->
@@ -188,6 +201,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // REALTIME DATABSE
 
+        fireInitSema.release()
 
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
         ref.addValueEventListener(object : ValueEventListener {
@@ -380,14 +394,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // Component 5: Size
         var sizeScore = 100
         val idealSize = userProfile.size
-        if (idealSize < listing.size) {
+        if (idealSize > listing.size) {
             sizeScore -= (idealSize - listing.size)/2
             if (sizeScore < 0) {
                 sizeScore = 0
             }
         }
 
-        return (commuteScore + atmosphereScore + walkScore + affordabilityScore + sizeScore)/5
+        println("commute Score - " + commuteScore)
+        println("atmos Score - " + atmosphereScore)
+        println("walk Score - " + walkScore)
+        println("afford Score - " + affordabilityScore)
+        println("size Score - " + sizeScore)
+
+        return ((commuteScore + atmosphereScore + walkScore + affordabilityScore + sizeScore) / 5)
     }
 
 
