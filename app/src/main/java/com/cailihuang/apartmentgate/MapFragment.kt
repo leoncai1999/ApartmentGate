@@ -70,6 +70,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_map, container, false)
+
+        viewModel = activity?.run {
+            ViewModelProviders.of(this)[MainViewModel::class.java]
+        } ?: throw Exception("Invalid Activity")
+        
+        viewModel.initFirestore()
+
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFrag) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
         geocoder = Geocoder(activity, Locale.getDefault())
@@ -95,19 +102,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val startLocation = LatLng(37.775453, -122.439660)
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 12.0f))
 
-        viewModel = activity?.run {
-            ViewModelProviders.of(this)[MainViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
-
-        viewModel.initFirestore()
-
 
         // Initially upload soundScore and walkScore scores to Cloud Firestore database
 //        val listingRef = viewModel.db.collection("listing")
 //        listingRef
 //            .get()
 //            .addOnSuccessListener { result ->
-//                println("YOLO")
 //                for (document in result) {
 //                        Log.d("LISTING", "${document.id} => ${document.data}")
 //                        val aListing = document.toObject(ApartmentListing::class.java)
@@ -153,31 +153,38 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 //                Log.d("LISTING", "Error getting documents: ", exception)
 //            }
 
+        // Set the ApartmentGate score for each listing
+        val listingRef = viewModel.db.collection("listing")
+        listingRef
+            .get()
+            .addOnSuccessListener { result ->
+                println("YOLO")
+                for (document in result) {
+                    Log.d("LISTING", "${document.id} => ${document.data}")
+                    val aListing = document.toObject(ApartmentListing::class.java)
+
+
+
+                    aListing.AGScore = calculateApartmentScore(aListing)
+                    val docRef = viewModel.db.collection("listing").document(document.id)
+                    //docRef.set(aListing)
+                    docRef.update("AGScore", 69)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.d("LISTING", "Error getting documents: ", exception)
+            }
+
 
         viewModel.populateListings()
 
-
-
         viewModel.getListings().observe(this, Observer { apartments ->
             for (i in 0 until apartments.size) {
-
-
-
-                val fullAddress = apartments[i].address1.substringBefore(" Unit") + ", " + apartments[i].address2
-
-
 
                 viewModel.db.collection("listing").document()
 
             }
         })
-
-
-
-
-
-
-
 
         // REALTIME DATABSE
 
@@ -194,7 +201,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 for (productSnapshot in dataSnapshot.children) {
                     if (count < 0) { // temporary solution
-                        val apartment = productSnapshot.getValue(ApartmentListingOld::class.java)
+                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
 //                        listings.add(apartment!!)
 //                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
 //                        map.setInfoWindowAdapter(markerInfoWindow)
@@ -300,8 +307,110 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return listings[0]
     }
 
-    private fun calculateApartmentScore(listing: ApartmentListing) {
 
+    fun calculateApartmentScore(listing: ApartmentListing): Int {
+        val userProfile = viewModel.currentUserProfile
+
+        // Component 1: Commute
+        var commuteScore = 100
+        var maxCommute = userProfile.maxCommuteTime.substringBefore(" ").toInt()
+        // maxCommute is 1 hour, convert to 60 min
+        if (maxCommute == 1) {
+            maxCommute = 60
+        }
+        val directionsApi = DirectionsApi.create()
+        val directionsRepository = DirectionsRepository(directionsApi)
+        var commuteTimeValue = 0
+        val getCommuteSema = Semaphore(1)
+        getCommuteSema.acquire()
+
+        val fullAddress = listing.address1.substringBefore(" Unit") + ", " + listing.address2
+        val apartmentCoords = geocoder.getFromLocationName(fullAddress, 1)
+        val workCoords = geocoder.getFromLocationName("160 Spear St, San Francisco, CA", 1)
+        val apartmentCoordsString = apartmentCoords[0].latitude.toString() + "," + apartmentCoords[0].longitude.toString()
+        val workCoordsString = workCoords[0].latitude.toString() + "," + workCoords[0].longitude.toString()
+
+        val uiScope = CoroutineScope(Dispatchers.Main + Job())
+        uiScope.launch(
+            context = uiScope.coroutineContext
+                    + Dispatchers.IO) {
+            val callResponse = directionsRepository.getDirections(apartmentCoordsString, workCoordsString, userProfile.transportation, dateToEpoch().toString(), APIKeys.googleMapsAPIKey)
+            val response = callResponse.execute()
+            commuteTimeValue = response.body()!!.routes[0].legs[0].duration.value
+            getCommuteSema.release()
+        }
+
+        getCommuteSema.acquire()
+        getCommuteSema.release()
+        commuteTimeValue /= 60
+        if (commuteTimeValue > maxCommute) {
+            commuteScore -= (commuteTimeValue - maxCommute) * 3
+            if (commuteScore < 0) {
+                commuteScore = 0
+            }
+        }
+
+        // Component 2: Atmosphere
+        var atmosphereScore = 100
+        var preferredAtmosphere = userProfile.demographic
+        val soundScore = listing.soundScore
+        if (preferredAtmosphere == "retirees" && soundScore < 85) {
+            atmosphereScore -= ((85 - soundScore) * 2.5).toInt()
+        } else if (preferredAtmosphere == "families") {
+            if (soundScore < 65) {
+                atmosphereScore -= ((65 - soundScore) * 2.5).toInt()
+            } else if (soundScore > 85) {
+                atmosphereScore -= (soundScore - 85)
+            }
+        } else if (preferredAtmosphere == "professionals" && soundScore > 65) {
+            atmosphereScore -= (soundScore - 65)
+        }
+
+        // Component 3: Walkability
+        val walkScore = listing.walkScore
+
+        // Component 4: Affordability
+        var affordabilityScore = 100
+        val idealRent = userProfile.budget
+        if (idealRent < listing.rent) {
+            val pointCost = idealRent / 100
+            affordabilityScore -= (listing.rent - idealRent) / pointCost
+        }
+
+        // Component 5: Size
+        var sizeScore = 100
+        val idealSize = userProfile.size
+        if (idealSize < listing.size) {
+            sizeScore -= (idealSize - listing.size)/2
+            if (sizeScore < 0) {
+                sizeScore = 0
+            }
+        }
+
+        return (commuteScore + atmosphereScore + walkScore + affordabilityScore + sizeScore)/5
     }
+
+
+
+    private fun dateToEpoch(): Long {
+        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+        if (workStartMinString == "0") {
+            workStartMinString += "0"
+        }
+        // add 8 hours to conver to UTC
+        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
+
+        println(" WHAT IS THE STRING ??? " + workStartHourString)
+        if (workStartHourString.length == 1) {
+            workStartHourString = "0" + workStartHourString
+        }
+        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
+        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
+        val date = df.parse(arrivalTimeString)
+        val epoch = date.time / 1000
+        return epoch
+    }
+
+
 
 }
