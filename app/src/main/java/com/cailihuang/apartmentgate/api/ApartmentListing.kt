@@ -26,5 +26,11 @@ data class ApartmentListing (
         @field:SerializedName("rent")
         var rent: Int = 0,
         @field:SerializedName("size")
-        var size: Int = 0
+        var size: Int = 0,
+        @field:SerializedName("AGScore")
+        var AGScore: Int = 0,
+        @field:SerializedName("soundScore")
+        var soundScore: Int = 0,
+        @field:SerializedName("walkScore")
+        var walkScore: Int = 0
 ): Parcelable

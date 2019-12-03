@@ -35,17 +35,17 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
-import com.cailihuang.apartmentgate.api.ApartmentListing
-import com.cailihuang.apartmentgate.api.CommuteTimeApi
-import com.cailihuang.apartmentgate.api.CommuteTimeInfo
-import com.cailihuang.apartmentgate.api.CommuteTimeRepository
+import com.cailihuang.apartmentgate.api.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import kotlinx.android.synthetic.main.user_profile_information.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.Semaphore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import java.net.URLEncoder
+import java.text.SimpleDateFormat
 
 
 class MapFragment : Fragment(), OnMapReadyCallback {
@@ -59,6 +59,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewModel: MainViewModel
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
+
+
     private var listings = mutableListOf<ApartmentListing>()
 
     // Right now, all of the commute times must be retrieved before you launch the list
@@ -99,22 +101,100 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         viewModel.initFirestore()
 
+
+        // Initially upload soundScore and walkScore scores to Cloud Firestore database
+//        val listingRef = viewModel.db.collection("listing")
+//        listingRef
+//            .get()
+//            .addOnSuccessListener { result ->
+//                println("YOLO")
+//                for (document in result) {
+//                        Log.d("LISTING", "${document.id} => ${document.data}")
+//                        val aListing = document.toObject(ApartmentListing::class.java)
+//                        val docRef = viewModel.db.collection("listing").document(document.id)
+//                        val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
+//                        val uiScope = CoroutineScope(Dispatchers.Main + Job())
+//                        val coords = geocoder.getFromLocationName(fullAddress, 1)
+//                        val addScoresSema = Semaphore(1)
+//
+//                        addScoresSema.acquire()
+//
+//                        val walkScoreApi = WalkScoreApi.create()
+//                        val walkScoreRepository = WalkScoreRepository(walkScoreApi)
+//                        uiScope.launch(
+//                            context = uiScope.coroutineContext
+//                                    + Dispatchers.IO) {
+//                            val callResponse = walkScoreRepository.getWalkScore(URLEncoder.encode(fullAddress, "UTF-8"), coords[0].latitude.toString(), coords[0].longitude.toString(), APIKeys.walkscoreAPIKey)
+//                            val response = callResponse.execute()
+//                            docRef.update("walkScore", response.body()!!.walkscore)
+//                            addScoresSema.release()
+//                        }
+//
+//                        addScoresSema.acquire()
+//
+//                        val howLoudApi = HowLoudApi.create()
+//                        val howLoudRepository = HowLoudRepository(howLoudApi)
+//                        uiScope.launch(
+//                            context = uiScope.coroutineContext
+//                                    + Dispatchers.IO) {
+//                            val callResponse = howLoudRepository.getHowLoudScore(URLEncoder.encode(fullAddress, "UTF-8"), APIKeys.soundscoreAPIKey)
+//                            val response = callResponse.execute()
+//                            if (response.isSuccessful) {
+//                                docRef.update("soundScore", response.body()!!.result[0].score)
+//                                addScoresSema.release()
+//                            }
+//                        }
+//
+//                        addScoresSema.acquire()
+//                        addScoresSema.release()
+//                }
+//            }
+//            .addOnFailureListener { exception ->
+//                Log.d("LISTING", "Error getting documents: ", exception)
+//            }
+
+
+        viewModel.populateListings()
+
+
+
+        viewModel.getListings().observe(this, Observer { apartments ->
+            for (i in 0 until apartments.size) {
+
+
+
+                val fullAddress = apartments[i].address1.substringBefore(" Unit") + ", " + apartments[i].address2
+
+
+
+                viewModel.db.collection("listing").document()
+
+            }
+        })
+
+
+
+
+
+
+
+
+        // REALTIME DATABSE
+
+
         val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 var count = 0
 
-                val commuteTimeApi = CommuteTimeApi.create()
-                val commuteTimeRepository = CommuteTimeRepository(commuteTimeApi)
-                //val job =
-                val uiScope = CoroutineScope(Dispatchers.Main + Job())
+                 val uiScope = CoroutineScope(Dispatchers.Main + Job())
 
                 var commuteTime = CommuteTimeInfo()
                 val commuteListingSema = Semaphore(1)
 
                 for (productSnapshot in dataSnapshot.children) {
-                    if (count < 5) { // temporary solution
-//                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
+                    if (count < 0) { // temporary solution
+                        val apartment = productSnapshot.getValue(ApartmentListingOld::class.java)
 //                        listings.add(apartment!!)
 //                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
 //                        map.setInfoWindowAdapter(markerInfoWindow)
@@ -122,24 +202,53 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 //                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
 //                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
 
+                        val address = geocoder.getFromLocationName(apartment!!.address1, 1)
+                        val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
+                            .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                        marker.tag = apartment
+                        marker.showInfoWindow()
+
 //                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
 //                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
 
-                        commuteListingSema.acquire()
+//                        commuteListingSema.acquire()
+//
+//                        uiScope.launch(
+//                            context = uiScope.coroutineContext
+//                                    + Dispatchers.IO) {
+//                            // Update LiveData from IO dispatcher, use postValue
+//
+//                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
+//
+//                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
+//                            commuteListingSema.release()
+//                        }
+//
+//                        commuteListingSema.acquire()
+//                        commuteListingSema.release()
 
-                        uiScope.launch(
-                            context = uiScope.coroutineContext
-                                    + Dispatchers.IO) {
-                            // Update LiveData from IO dispatcher, use postValue
-
-                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
-
-                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
-                            commuteListingSema.release()
+                        val mode = viewModel.currentUserProfile.transportation
+                        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+                        if (workStartMinString == "0") {
+                            workStartMinString += "0"
                         }
+                        // add 8 hours to conver to UTC
+                        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
 
-                        commuteListingSema.acquire()
-                        commuteListingSema.release()
+                        println(" WHAT IS THE STRING ??? " + workStartHourString)
+                        if (workStartHourString.length == 1) {
+                            workStartHourString = "0" + workStartHourString
+                        }
+                        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
+                        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
+                        val date = df.parse(arrivalTimeString)
+                        val epoch = date.time / 1000
+
+//                        viewModel.fetchDirections("37.779020,-122.479290", "37.792422,-122.406252", mode, epoch.toString(), APIKeys.googleMapsAPIKey)
+//                        viewModel.observeCommuteTime().observe(this, Observer {
+//                            commuteTime = it
+//                        })
+
 
                         Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
 
@@ -189,6 +298,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
         return listings[0]
+    }
+
+    private fun calculateApartmentScore(listing: ApartmentListing) {
+
     }
 
 }

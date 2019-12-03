@@ -190,6 +190,13 @@ class MainViewModel : ViewModel() {
         return currentWalkScore
     }
 
+    fun getWalkScore(address: String, lat: String, lon: String): Int {
+        val callResponse = walkScoreRepository.getWalkScore(address, lat, lon, APIKeys.walkscoreAPIKey)
+        val response = callResponse.execute()
+        return response.body()!!.walkscore
+
+    }
+
     fun fetchHowLoudScore(address: String, key: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
@@ -200,6 +207,12 @@ class MainViewModel : ViewModel() {
                 currentHowLoudScore.postValue(response.body()!!.result[0])
             }
         }
+    }
+
+    fun getSoundScore(address: String): Int {
+        val callResponse = howLoudRepository.getHowLoudScore(address, APIKeys.soundscoreAPIKey)
+        val response = callResponse.execute()
+        return response.body()!!.result[0].score
     }
 
     fun observeHowLoudScore(): LiveData<HowLoudScore> {
