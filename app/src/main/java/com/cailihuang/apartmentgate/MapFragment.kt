@@ -66,6 +66,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var listings = mutableListOf<ApartmentListing>()
 
     private var fireInitSema = Semaphore(1)
+    private var recalcSema = Semaphore(1)
 
     // Right now, all of the commute times must be retrieved before you launch the list
 
@@ -84,7 +85,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        println("DOES IT GET HERE??? AHHHHHHHHH")
+        //println("DOES IT GET HERE??? AHHHHHHHHH")
 
         viewModel.initFirestore()
 
@@ -166,33 +167,52 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // Set the ApartmentGate score for each listing
 
+
+        recalcSema.acquire()
+
         val lastUserIdRef = viewModel.db.collection("LastUser").document("lastuser")
         lastUserIdRef.get().addOnSuccessListener { document ->
             val lastUserID = document.toObject(UserID::class.java)!!.userid
             val currentUser = FirebaseAuth.getInstance().currentUser!!.uid
-            println("currentUser id is: " + currentUser)
-            println("lastUser id is: " + lastUserID)
+           // println("currentUser id is: " + currentUser)
+          //  println("lastUser id is: " + lastUserID)
             if (currentUser != lastUserID) {
                 val listingRef = viewModel.db.collection("listing")
                 listingRef
                     .get()
                     .addOnSuccessListener { result ->
+                        var count = 0
                         for (document in result) {
-                            Log.d("LISTING", "${document.id} => ${document.data}")
-                            val aListing = document.toObject(ApartmentListing::class.java)
-                            aListing.AGScore = calculateApartmentScore(aListing)
-                            val docRef = viewModel.db.collection("listing").document(document.id)
-                            docRef.update("agscore", aListing.AGScore)
+                            if (count < 25) {
+                                // Log.d("LISTING", "${document.id} => ${document.data}")
+                                val aListing = document.toObject(ApartmentListing::class.java)
+                                aListing.AGScore = calculateApartmentScore(aListing)
+                                val docRef = viewModel.db.collection("listing").document(document.id)
+                                docRef.update("agscore", aListing.AGScore)
+
+
+                                val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
+                                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
+                                docRef.update("latitude", apartmentAddress[0].latitude)
+                                docRef.update("longitude", apartmentAddress[0].longitude)
+                                count++
+                            }
                         }
+                        lastUserIdRef.update("userid", currentUser)
+                        recalcSema.release()
                     }
                     .addOnFailureListener { exception ->
-                        Log.d("LISTING", "Error getting documents: ", exception)
+                        //Log.d("LISTING", "Error getting documents: ", exception)
                     }
-                lastUserIdRef.update("userid", currentUser)
+            } else {
+                recalcSema.release()
             }
         }
 
         viewModel.populateListings()
+
+//        recalcSema.acquire()
+//        recalcSema.release()
 
         viewModel.getListings().observe(this, Observer { apartments ->
             for (i in 0 until apartments.size) {
@@ -203,106 +223,23 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                 map.setInfoWindowAdapter(markerInfoWindow)
 
-                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-                val marker = map.addMarker(MarkerOptions().position(LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude))
-                    .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+//                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
+//                val marker = map.addMarker(MarkerOptions().position(LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude))
+//                    .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
+                        .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 marker.tag = apartment
                 marker.showInfoWindow()
 
             }
+            val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
+            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
         })
 
         // REALTIME DATABSE
 
         fireInitSema.release()
 
-
-
-
-//        val ref = FirebaseDatabase.getInstance().getReference("listings").child("TZAVBG6NoTmSCv1tFdhe").child("apartment")
-//        ref.addValueEventListener(object : ValueEventListener {
-//            override fun onDataChange(dataSnapshot: DataSnapshot) {
-//                var count = 0
-//
-//                 val uiScope = CoroutineScope(Dispatchers.Main + Job())
-//
-//                var commuteTime = CommuteTimeInfo()
-//                val commuteListingSema = Semaphore(1)
-//
-//                for (productSnapshot in dataSnapshot.children) {
-//                    if (count < 0) { // temporary solution
-//                        val apartment = productSnapshot.getValue(ApartmentListing::class.java)
-////                        listings.add(apartment!!)
-////                        val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
-////                        map.setInfoWindowAdapter(markerInfoWindow)
-//
-////                        val apartmentAddress = geocoder.getFromLocationName(apartment.address, 1)
-////                        val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-//
-//                        val address = geocoder.getFromLocationName(apartment!!.address1, 1)
-//                        val marker = map.addMarker(MarkerOptions().position(LatLng(address[0].latitude, address[0].longitude))
-//                            .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
-//                        marker.tag = apartment
-//                        marker.showInfoWindow()
-//
-////                        val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
-////                        val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
-//
-////                        commuteListingSema.acquire()
-////
-////                        uiScope.launch(
-////                            context = uiScope.coroutineContext
-////                                    + Dispatchers.IO) {
-////                            // Update LiveData from IO dispatcher, use postValue
-////
-////                            //commuteTime = commuteTimeRepository.getCommuteTime(origin, destination)
-////
-////                            commuteTime = commuteTimeRepository.getCommuteTime("37.779020, -122.479290", "37.792422, -122.406252")
-////                            commuteListingSema.release()
-////                        }
-////
-////                        commuteListingSema.acquire()
-////                        commuteListingSema.release()
-//
-//                        val mode = viewModel.currentUserProfile.transportation
-//                        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
-//                        if (workStartMinString == "0") {
-//                            workStartMinString += "0"
-//                        }
-//                        // add 8 hours to conver to UTC
-//                        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
-//
-//                        println(" WHAT IS THE STRING ??? " + workStartHourString)
-//                        if (workStartHourString.length == 1) {
-//                            workStartHourString = "0" + workStartHourString
-//                        }
-//                        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
-//                        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
-//                        val date = df.parse(arrivalTimeString)
-//                        val epoch = date.time / 1000
-//
-////                        viewModel.fetchDirections("37.779020,-122.479290", "37.792422,-122.406252", mode, epoch.toString(), APIKeys.googleMapsAPIKey)
-////                        viewModel.observeCommuteTime().observe(this, Observer {
-////                            commuteTime = it
-////                        })
-//
-//
-//                        Log.d("COMMUTE TIME", "count is $count --- commute time ${commuteTime.value}")
-//
-//                        //viewModel.commuteTimes.put(apartment.address1, commuteTime)
-//
-//                        count++
-//                    }
-//                }
-//
-//                //val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-//                //map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
-//            }
-//
-//            override fun onCancelled(databaseError: DatabaseError) {
-//                throw databaseError.toException()
-//            }
-//        })
 
         map.setOnInfoWindowClickListener {
             // the on click listener is applied to the whole marker dialog because there is no
@@ -402,7 +339,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
 
         // Component 3: Walkability
-        val walkScore = listing.walkScore
+        val walkValue = listing.walkScore
+        var walkScore = listing.walkScore
+        val walkabilityImportance = userProfile.walkability
+        if (walkabilityImportance == "carealot") {
+            walkScore -= (100 - walkValue)
+            if (walkScore < 0) {
+                walkScore = 0
+            }
+        } else if (walkabilityImportance == "dontcare") {
+            walkScore += ((100 - walkValue)*.25).toInt()
+            if (walkScore > 100) {
+                walkScore = 100
+            }
+        }
 
         // Component 4: Affordability
         var affordabilityScore = 100
@@ -429,11 +379,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-        println("commute Score - " + commuteScore)
-        println("atmos Score - " + atmosphereScore)
-        println("walk Score - " + walkScore)
-        println("afford Score - " + affordabilityScore)
-        println("size Score - " + sizeScore)
+//        println("commute Score - " + commuteScore)
+//        println("atmos Score - " + atmosphereScore)
+//        println("walk Score - " + walkScore)
+//        println("afford Score - " + affordabilityScore)
+//        println("size Score - " + sizeScore)
 
         return ((commuteScore + atmosphereScore + walkScore + affordabilityScore + sizeScore) / 5)
     }
@@ -448,7 +398,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         // add 8 hours to conver to UTC
         var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
 
-        println(" WHAT IS THE STRING ??? " + workStartHourString)
+        //println(" WHAT IS THE STRING ??? " + workStartHourString)
         if (workStartHourString.length == 1) {
             workStartHourString = "0" + workStartHourString
         }

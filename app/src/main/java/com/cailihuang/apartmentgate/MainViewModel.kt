@@ -112,7 +112,7 @@ class MainViewModel : ViewModel() {
             .addOnSuccessListener { result ->
                 var count = 0
                 for (document in result) {
-                    if (count < 100) {
+                    if (count < 25) { // change as necessary for testing
                         val aListing = document.toObject(ApartmentListing::class.java)
                         listings.add(aListing)
                         count++

@@ -32,6 +32,7 @@ import kotlin.collections.ArrayList
 import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Dot
+import kotlinx.android.synthetic.main.fragment_one_listing.*
 import java.text.SimpleDateFormat
 
 class OneListingFragment : Fragment(), OnMapReadyCallback {
@@ -77,6 +78,14 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val backButton = rootView.findViewById<TextView>(R.id.backButton)
         backButton.setOnClickListener {
             fragmentManager!!.popBackStack()
+        }
+
+        val favoriteButton = rootView.findViewById<ImageView>(R.id.actionFavorite)
+
+        favoriteButton.setImageResource(R.drawable.ic_favorite_border_black_24dp)
+
+        if (viewModel.isFav(listing)) {
+            favoriteButton.setImageResource(R.drawable.ic_favorite_black_24dp)
         }
 
         val apartmentNameTV = rootView.findViewById<TextView>(R.id.apartmentName)
@@ -152,6 +161,18 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         viewModel.observeHowLoudScore().observe(this, Observer {
             apartmentSoundScoreTV.text = "Sound Score®: " + it.score
         })
+
+        favoriteButton.setOnClickListener {
+            if (viewModel.isFav(listing)) {
+                favoriteButton.setImageResource(R.drawable.ic_favorite_border_black_24dp)
+                viewModel.removeFav(listing)
+                viewModel.updateTrendingNeighborhoods(listing, true)
+            } else {
+                favoriteButton.setImageResource(R.drawable.ic_favorite_black_24dp)
+                viewModel.addFav(listing)
+                viewModel.updateTrendingNeighborhoods(listing, false)
+            }
+        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.apartmentMapFrag) as? SupportMapFragment
         mapFragment?.getMapAsync(this)

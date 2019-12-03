@@ -37,11 +37,12 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
         var rentTextView = itemView.findViewById<TextView>(R.id.rentTV)
         var bedTextView = itemView.findViewById<TextView>(R.id.bedTV)
         var sizeTextView = itemView.findViewById<TextView>(R.id.sizeTV)
-        var commuteTextView = itemView.findViewById<TextView>(R.id.commuteTimeTV)
         var favView = itemView.findViewById<ImageView>(R.id.rowFav)
 
         fun bind(item: ApartmentListing?) {
             if (item == null) return
+
+            favView.setImageResource(R.drawable.ic_favorite_border_black_24dp)
 
             nameTextView.text = item.address1
             addressTextView.text = item.address2
@@ -51,7 +52,6 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 bedTextView.text = "Studio"
             }
             sizeTextView.text = """${item.size} sq ft"""
-            commuteTextView.text = viewModel.commuteTimes.get(item.address1)?.text
 
             if (viewModel.isFav(item)) {
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)

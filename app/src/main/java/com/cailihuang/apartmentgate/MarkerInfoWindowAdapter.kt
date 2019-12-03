@@ -21,6 +21,7 @@ class MarkerInfoWindowAdapter(val context: Context) : GoogleMap.InfoWindowAdapte
         infoView.markerApartmentAddress.text = infoWindow?.address2
         infoView.markerRent.text = infoWindow?.rent.toString()
         infoView.markerBeds.text = infoWindow?.beds.toString()
+        infoView.markerAGScore.text = infoWindow?.AGScore.toString()
 
         return infoView
     }

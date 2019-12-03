@@ -19,6 +19,10 @@ data class ApartmentListing (
         var beds: Int = 0,
         @field:SerializedName("deposit")
         var deposit: Int = 0,
+        @field:SerializedName("latitude")
+        var latitude: Double = 0.0,
+        @field:SerializedName("longitude")
+        var longitude: Double = 0.0,
         @field:SerializedName("neighborhood")
         var neighborhood: String = "",
         @field:SerializedName("neighborhood_url")
