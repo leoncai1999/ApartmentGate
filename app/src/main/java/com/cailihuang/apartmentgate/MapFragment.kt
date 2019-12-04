@@ -174,8 +174,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         lastUserIdRef.get().addOnSuccessListener { document ->
             val lastUserID = document.toObject(UserID::class.java)!!.userid
             val currentUser = FirebaseAuth.getInstance().currentUser!!.uid
-           // println("currentUser id is: " + currentUser)
-          //  println("lastUser id is: " + lastUserID)
             if (currentUser != lastUserID) {
                 val listingRef = viewModel.db.collection("listing")
                 listingRef
@@ -222,18 +220,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
                 val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                 map.setInfoWindowAdapter(markerInfoWindow)
-
-//                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-//                val marker = map.addMarker(MarkerOptions().position(LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude))
-//                    .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
                         .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 marker.tag = apartment
                 marker.showInfoWindow()
 
             }
-            val workAddress = geocoder.getFromLocationName(viewModel.getWorkAddress().value, 1)
-            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+//            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
+//            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
         })
 
         // REALTIME DATABSE

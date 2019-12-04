@@ -34,27 +34,23 @@ class MainViewModel : ViewModel() {
     lateinit var currentUserProfile: UserProfile
 
     fun initFirestore() {
-        println("uno")
         db = FirebaseFirestore.getInstance()
-        println("dos")
-        val user = FirebaseAuth.getInstance().currentUser!!
-        println("tres")
-        println("user id is: " + user.uid)
-        userRef = db.collection("Users").document(user.uid)
-        println("4")
-        userRef.get()
-            .addOnSuccessListener { document ->
-                println("5")
-                if (document != null) {
-                    Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
-                    currentUserProfile = document.toObject(UserProfile::class.java)!!
-                } else {
-                    Log.d("CLOUD FIRESTORE", "No such document")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.d("CLOUD FIRESTORE", "get failed with ", exception)
-            }
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            userRef = db.collection("Users").document(user.uid)
+            userRef.get()
+                    .addOnSuccessListener { document ->
+                        if (document != null) {
+                            Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
+                            currentUserProfile = document.toObject(UserProfile::class.java)!!
+                        } else {
+                            Log.d("CLOUD FIRESTORE", "No such document")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d("CLOUD FIRESTORE", "get failed with ", exception)
+                    }
+        }
     }
 
     private var favListings = MutableLiveData<List<ApartmentListing>>().apply {
@@ -77,12 +73,6 @@ class MainViewModel : ViewModel() {
         value = mutableListOf()
     }
 
-    val commuteTimes = mutableMapOf<String, CommuteTimeInfo>()
-
-    private val workAddress = MutableLiveData<String>().apply {
-        value = "160 Spear St, San Francisco, CA"
-    }
-
     private val walkScoreApi = WalkScoreApi.create()
     private val walkScoreRepository = WalkScoreRepository(walkScoreApi)
     private var currentWalkScore = MutableLiveData<WalkScore>()
@@ -99,8 +89,6 @@ class MainViewModel : ViewModel() {
     private var currentDirections = MutableLiveData<List<DirectionsApi.Steps>>()
     private var currentDistance = MutableLiveData<String>()
     private var currentDurationInTraffic = MutableLiveData<String>()
-
-    private lateinit var geocoder: Geocoder
 
     fun populateListings() {
         val listingRefFiltered = getFilterListingRef()
@@ -129,7 +117,6 @@ class MainViewModel : ViewModel() {
             "Rent high to low" -> return listingRefFiltered.orderBy("rent", Query.Direction.DESCENDING)
             "Size low to high" -> return listingRefFiltered.orderBy("size")
             "Size high to low" -> return listingRefFiltered.orderBy("size", Query.Direction.DESCENDING)
-            "Commute time" -> println("IDK about this one yet") // TODO probably take this out
         }
 
         return listingRefFiltered
@@ -172,21 +159,12 @@ class MainViewModel : ViewModel() {
                 println(neighborhood.toString())
                 cityNeighborhoods.add(neighborhood)
             }
-            println("list to post is: " + cityNeighborhoods.toString())
             neighborhoods.postValue(cityNeighborhoods)
         }
     }
 
     fun getNeighborhoods(): LiveData<List<Neighborhood>> {
         return neighborhoods
-    }
-
-    fun setWorkAddress(address: String) {
-        workAddress.value = address
-    }
-
-    fun getWorkAddress() : LiveData<String> {
-        return workAddress
     }
 
     fun fetchWalkScore(address: String, lat: String, lon: String, key: String) {
@@ -205,13 +183,6 @@ class MainViewModel : ViewModel() {
         return currentWalkScore
     }
 
-    fun getWalkScore(address: String, lat: String, lon: String): Int {
-        val callResponse = walkScoreRepository.getWalkScore(address, lat, lon, APIKeys.walkscoreAPIKey)
-        val response = callResponse.execute()
-        return response.body()!!.walkscore
-
-    }
-
     fun fetchHowLoudScore(address: String, key: String) {
         viewModelScope.launch(
                 context = viewModelScope.coroutineContext
@@ -222,12 +193,6 @@ class MainViewModel : ViewModel() {
                 currentHowLoudScore.postValue(response.body()!!.result[0])
             }
         }
-    }
-
-    fun getSoundScore(address: String): Int {
-        val callResponse = howLoudRepository.getHowLoudScore(address, APIKeys.soundscoreAPIKey)
-        val response = callResponse.execute()
-        return response.body()!!.result[0].score
     }
 
     fun observeHowLoudScore(): LiveData<HowLoudScore> {
@@ -382,102 +347,5 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-
-
-    fun calculateApartmentScore(listing: ApartmentListing,apartmentCoords: String, workCoords: String): Int {
-        val userProfile = currentUserProfile
-
-        // Component 1: Commute
-        var commuteScore = 100
-        var maxCommute = userProfile.maxCommuteTime.substringBefore(" ").toInt()
-        // maxCommute is 1 hour, convert to 60 min
-        if (maxCommute == 1) {
-            maxCommute = 60
-        }
-        val directionsApi = DirectionsApi.create()
-        val directionsRepository = DirectionsRepository(directionsApi)
-        var commuteTimeValue = 0
-        val getCommuteSema = Semaphore(1)
-        getCommuteSema.acquire()
-
-
-        viewModelScope.launch(
-            context = viewModelScope.coroutineContext
-                    + Dispatchers.IO) {
-            val callResponse = directionsRepository.getDirections(apartmentCoords, workCoords, userProfile.transportation, dateToEpoch().toString(), APIKeys.googleMapsAPIKey)
-            val response = callResponse.execute()
-            commuteTimeValue = response.body()!!.routes[0].legs[0].duration.value
-            getCommuteSema.release()
-        }
-
-        getCommuteSema.acquire()
-        getCommuteSema.release()
-        commuteTimeValue /= 60
-        if (commuteTimeValue > maxCommute) {
-            commuteScore -= (commuteTimeValue - maxCommute) * 3
-            if (commuteScore < 0) {
-                commuteScore = 0
-            }
-        }
-
-        // Component 2: Atmosphere
-        var atmosphereScore = 100
-        var preferredAtmosphere = userProfile.demographic
-        val soundScore = listing.soundScore
-        if (preferredAtmosphere == "retirees" && soundScore < 85) {
-            atmosphereScore -= ((85 - soundScore) * 2.5).toInt()
-        } else if (preferredAtmosphere == "families") {
-            if (soundScore < 65) {
-                atmosphereScore -= ((65 - soundScore) * 2.5).toInt()
-            } else if (soundScore > 85) {
-                atmosphereScore -= (soundScore - 85)
-            }
-        } else if (preferredAtmosphere == "professionals" && soundScore > 65) {
-            atmosphereScore -= (soundScore - 65)
-        }
-
-        // Component 3: Walkability
-        val walkScore = listing.walkScore
-
-        // Component 4: Affordability
-        var affordabilityScore = 100
-        val idealRent = userProfile.budget
-        if (idealRent < listing.rent) {
-            val pointCost = idealRent / 100
-            affordabilityScore -= (listing.rent - idealRent) / pointCost
-        }
-
-        // Component 5: Size
-        var sizeScore = 100
-        val idealSize = userProfile.size
-        if (idealSize < listing.size) {
-            sizeScore -= (idealSize - listing.size)/2
-            if (sizeScore < 0) {
-                sizeScore = 0
-            }
-        }
-
-        return (commuteScore + atmosphereScore + walkScore + affordabilityScore + sizeScore)/5
-    }
-
-    private fun dateToEpoch(): Long {
-        var workStartMinString = currentUserProfile.workStartMin.toString()
-        if (workStartMinString == "0") {
-            workStartMinString += "0"
-        }
-        // add 8 hours to conver to UTC
-        var workStartHourString = (currentUserProfile.workStartHour + 8).toString()
-
-        println(" WHAT IS THE STRING ??? " + workStartHourString)
-        if (workStartHourString.length == 1) {
-            workStartHourString = "0" + workStartHourString
-        }
-        val arrivalTimeString = "Dec 02 2019 " + workStartHourString + ":" + workStartMinString + ":00.000 UTC"
-        val df = SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz")
-        val date = df.parse(arrivalTimeString)
-        val epoch = date.time / 1000
-        return epoch
-    }
-
 
 }

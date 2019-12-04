@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -59,6 +60,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         rv.adapter = directionsAdapter
         rv.layoutManager = LinearLayoutManager(context)
         rv.addItemDecoration(DividerItemDecoration(rv.getContext(), DividerItemDecoration.VERTICAL))
+        rv.isNestedScrollingEnabled = false
     }
 
     override fun onCreateView(inflater: LayoutInflater,
@@ -92,6 +94,16 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         apartmentNameTV.text = listing!!.address1
         val apartmentAddressTV = rootView.findViewById<TextView>(R.id.apartmentAddress)
         apartmentAddressTV.text = fullAddress
+        val apartmentGateScoreTV = rootView.findViewById<TextView>(R.id.apartmentGateScore)
+        val agScore = listing.AGScore
+        if (agScore >= 85) {
+            apartmentGateScoreTV.setTextColor(ContextCompat.getColor(context!!, R.color.chromeGreen))
+        } else if (agScore >= 70) {
+            apartmentGateScoreTV.setTextColor(ContextCompat.getColor(context!!, R.color.chromeYellow))
+        } else {
+            apartmentGateScoreTV.setTextColor(ContextCompat.getColor(context!!, R.color.chromeRed))
+        }
+        apartmentGateScoreTV.text = agScore.toString()
         val apartmentRentTV = rootView.findViewById<TextView>(R.id.apartmentRent)
         apartmentRentTV.text = "Rent: $" + listing.rent + "/month"
         val apartmentBedroomsTV = rootView.findViewById<TextView>(R.id.apartmentBedrooms)
@@ -119,7 +131,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         Glide.glideFetch(imageURL, apartmentImage)
 
         val apartmentWalkScoreTV = rootView.findViewById<TextView>(R.id.apartmentWalkScore)
-        val apartmentTransitScoreTV = rootView.findViewById<TextView>(R.id.apartmentTransitScore)
+        //val apartmentTransitScoreTV = rootView.findViewById<TextView>(R.id.apartmentTransitScore)
         val apartmentBikeScoreTV = rootView.findViewById<TextView>(R.id.apartmentBikeScore)
         val apartmentSoundScoreTV = rootView.findViewById<TextView>(R.id.apartmentSoundScore)
 
@@ -138,14 +150,14 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
                 startActivity(browserIntent)
             }
 
-            val transitscoreText = SpannableString("Transit Score®: " + it.transit.score)
-            transitscoreText.setSpan(UnderlineSpan(), 0, 13, 0)
-            transitscoreText.setSpan(UnderlineSpan(), 16, transitscoreText.length, 0)
-            apartmentTransitScoreTV.text = transitscoreText
-            apartmentTransitScoreTV.setOnClickListener {
-                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(wsHelpLink))
-                startActivity(browserIntent)
-            }
+//            val transitscoreText = SpannableString("Transit Score®: " + it.transit.score)
+//            transitscoreText.setSpan(UnderlineSpan(), 0, 13, 0)
+//            transitscoreText.setSpan(UnderlineSpan(), 16, transitscoreText.length, 0)
+//            apartmentTransitScoreTV.text = transitscoreText
+//            apartmentTransitScoreTV.setOnClickListener {
+//                val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(wsHelpLink))
+//                startActivity(browserIntent)
+//            }
 
             val bikescoreText = SpannableString("Bike Score®: " + it.bike.score)
             bikescoreText.setSpan(UnderlineSpan(), 0, 10, 0)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -65,6 +65,32 @@
             android:adjustViewBounds="true"
             android:src="@drawable/no_image_available" />
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/apartmentGateScoreText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textSize="16dp"
+                android:text="ApartmentGate Score:"
+                android:layout_weight="0"/>
+
+            <TextView
+                android:id="@+id/apartmentGateScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/apartmentCommuteTime"
             android:layout_width="match_parent"
@@ -128,9 +154,9 @@
             android:id="@+id/directionsRV"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -194,35 +220,31 @@
             android:textSize="16dp"
             android:text="Neighborhood: " />
 
-        <TextView
-            android:id="@+id/apartmentWalkScore"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Walk Score®: " />
+            android:layout_marginTop="8dp">
 
-        <TextView
-            android:id="@+id/apartmentTransitScore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Transit Score®: " />
+            <TextView
+                android:id="@+id/apartmentWalkScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:textSize="16dp"
+                android:text="Walk Score®: "
+                android:layout_weight="1"/>
 
-        <TextView
-            android:id="@+id/apartmentBikeScore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Bike Score®: " />
+            <TextView
+                android:id="@+id/apartmentBikeScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Bike Score®: "
+                android:layout_weight="1" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/apartmentSoundScore"
@@ -245,4 +267,4 @@
             android:textSize="16dp" />
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
