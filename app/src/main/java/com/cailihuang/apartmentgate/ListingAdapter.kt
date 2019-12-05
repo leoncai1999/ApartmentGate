@@ -38,15 +38,18 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
         var bedTextView = itemView.findViewById<TextView>(R.id.bedTV)
         var sizeTextView = itemView.findViewById<TextView>(R.id.sizeTV)
         var favView = itemView.findViewById<ImageView>(R.id.rowFav)
+        var agScoreTextView = itemView.findViewById<TextView>(R.id.agScoreTV)
 
         fun bind(item: ApartmentListing?) {
             if (item == null) return
 
             favView.setImageResource(R.drawable.ic_favorite_border_black_24dp)
 
+            val fullAddress = item.address1.substringBefore(" Unit") + ", " + item.address2
+
             nameTextView.text = item.address1
-            addressTextView.text = item.address2
-            rentTextView.text =  """$${item.rent}"""
+            addressTextView.text = fullAddress
+            rentTextView.text =  """${item.rent}/month"""
             bedTextView.text = item.beds.toString()
             if (bedTextView.text == "0") {
                 bedTextView.text = "Studio"
@@ -56,6 +59,8 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
             if (viewModel.isFav(item)) {
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)
             }
+
+            agScoreTextView.text = item.AGScore.toString()
 
             nameTextView.setOnClickListener {
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))

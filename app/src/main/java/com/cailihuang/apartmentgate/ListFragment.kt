@@ -117,6 +117,14 @@ class ListFragment: Fragment() {
         return root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        mapButton.setOnClickListener {
+            (activity as MainActivity).setFragment(MapFragment.newInstance())
+        }
+    }
+
     private fun convertFirestoreStringToInts() {
         val listingRef = viewModel.db.collection("listing")
         listingRef
