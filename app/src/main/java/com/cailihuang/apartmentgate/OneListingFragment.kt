@@ -79,7 +79,8 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         val backButton = rootView.findViewById<TextView>(R.id.backButton)
         backButton.setOnClickListener {
-            fragmentManager!!.popBackStack()
+            println("HOW MANY BACK STACK ENTRIES ??? " + (activity as MainActivity).supportFragmentManager.backStackEntryCount)
+            (activity as MainActivity).supportFragmentManager.popBackStackImmediate()
         }
 
         val favoriteButton = rootView.findViewById<ImageView>(R.id.actionFavorite)
@@ -194,11 +195,12 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        val currentUserProf = viewModel.currentUserProfile
 
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
         val fullAddress = listing!!.address1.substringBefore(" Unit") + ", " + listing.address2
         val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-        val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
+        val workAddress = geocoder.getFromLocationName(currentUserProf.workAddress, 1)
         val apartmentCoords = LatLng(apartmentAddress[0].latitude, apartmentAddress[0].longitude)
         val workCoords = LatLng(workAddress[0].latitude, workAddress[0].longitude)
 
@@ -209,13 +211,13 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val origin = apartmentAddress[0].latitude.toString() + "," + apartmentAddress[0].longitude.toString()
         val destination = workAddress[0].latitude.toString() + ", " + workAddress[0].longitude.toString()
 
-        val mode = viewModel.currentUserProfile.transportation
-        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+        val mode = currentUserProf.transportation
+        var workStartMinString = currentUserProf.workStartMin.toString()
         if (workStartMinString == "0") {
             workStartMinString += "0"
         }
         // add 8 hours to conver to UTC
-        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
+        var workStartHourString = (currentUserProf.workStartHour + 8).toString()
 
         println(" WHAT IS THE STRING ??? " + workStartHourString)
         if (workStartHourString.length == 1) {

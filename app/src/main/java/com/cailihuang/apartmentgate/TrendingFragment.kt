@@ -23,7 +23,6 @@ class TrendingFragment: Fragment() {
     }
 
     private fun initAdapter(root: View) {
-        viewModel.initFirestore()
         val rv = root.findViewById<RecyclerView>(R.id.neighborhoodsRV)
         trendingAdapter = TrendingListAdapter(viewModel)
         rv.adapter = trendingAdapter

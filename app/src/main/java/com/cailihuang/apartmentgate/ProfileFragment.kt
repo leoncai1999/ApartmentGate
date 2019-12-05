@@ -74,12 +74,13 @@ class ProfileFragment: Fragment() {
                         if (addressET.text.isNotEmpty()) {
                             profile?.workAddress = addressET.text.toString()
                         }
+
                         profile?.workStartHour = startTime.hour
                         profile?.workStartMin = startTime.minute
                         profile?.workEndHour = endTime.hour
                         profile?.workEndMin = endTime.minute
-                        profile?.transportation = preferredTransport
                         profile?.maxCommuteTime = commuteTimeSpinner.selectedItem.toString()
+                        profile?.transportation = preferredTransport
                         profile?.demographic = demographic
                         profile?.walkability = walkability
                         if (budgetET.text.isNotEmpty()) {
@@ -150,7 +151,7 @@ class ProfileFragment: Fragment() {
 
         // TODO reset color when another option selected
         carButton.setOnClickListener {
-            preferredTransport = "car"
+            preferredTransport = "driving"
             //changeButtonsColors(carButton, transitButton, walkButton, bikeButton)
             ViewCompat.setBackgroundTintList(carButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
         }
@@ -160,12 +161,12 @@ class ProfileFragment: Fragment() {
             ViewCompat.setBackgroundTintList(transitButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
         }
         walkButton.setOnClickListener {
-            preferredTransport = "walk"
+            preferredTransport = "walking"
             //changeButtonsColors(walkButton, carButton, transitButton, bikeButton)
             ViewCompat.setBackgroundTintList(walkButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
         }
         bikeButton.setOnClickListener {
-            preferredTransport = "bike"
+            preferredTransport = "bicycling"
             //changeButtonsColors(bikeButton, walkButton, carButton, transitButton)
             ViewCompat.setBackgroundTintList(bikeButton, ContextCompat.getColorStateList(context!!, android.R.color.holo_blue_dark))
         }

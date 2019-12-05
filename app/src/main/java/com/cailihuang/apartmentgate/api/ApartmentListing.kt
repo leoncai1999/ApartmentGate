@@ -17,6 +17,8 @@ data class ApartmentListing (
         var baths: Int = 0,
         @field:SerializedName("beds")
         var beds: Int = 0,
+        @field:SerializedName("commuteTime")
+        var commuteTime: Int = 0,
         @field:SerializedName("deposit")
         var deposit: Int = 0,
         @field:SerializedName("latitude")

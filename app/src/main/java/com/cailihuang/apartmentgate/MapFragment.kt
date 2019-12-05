@@ -62,6 +62,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var viewModel: MainViewModel
     private lateinit var geocoder: Geocoder
     private lateinit var map: GoogleMap
+    private lateinit var workCoordsString: String
 
     private var listings = mutableListOf<ApartmentListing>()
 
@@ -72,7 +73,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     data class UserID (
         @field:SerializedName("userid")
-        var userid: String = "")
+        var userid: String = "",
+        @field:SerializedName("address")
+        var address: String = "",
+        @field:SerializedName("transportation")
+        var transportation: String = "",
+        @field:SerializedName("workStartTime")
+        var workStartTime: String = "")
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -93,7 +100,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapFragment?.getMapAsync(this)
         geocoder = Geocoder(activity, Locale.getDefault())
 
-        fireInitSema.release()
+
+
 
         return rootView
     }
@@ -107,7 +115,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        fireInitSema.acquire()
+        //fireInitSema.acquire()
         map = googleMap
 
         // start map at center of San Francisco
@@ -167,44 +175,68 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // Set the ApartmentGate score for each listing
 
-
-        recalcSema.acquire()
+        //recalcSema.acquire()
 
         val lastUserIdRef = viewModel.db.collection("LastUser").document("lastuser")
         lastUserIdRef.get().addOnSuccessListener { document ->
-            val lastUserID = document.toObject(UserID::class.java)!!.userid
-            val currentUser = FirebaseAuth.getInstance().currentUser!!.uid
-            if (currentUser != lastUserID) {
-                val listingRef = viewModel.db.collection("listing")
-                listingRef
-                    .get()
-                    .addOnSuccessListener { result ->
-                        var count = 0
-                        for (document in result) {
-                            if (count < 25) {
-                                // Log.d("LISTING", "${document.id} => ${document.data}")
-                                val aListing = document.toObject(ApartmentListing::class.java)
-                                aListing.AGScore = calculateApartmentScore(aListing)
-                                val docRef = viewModel.db.collection("listing").document(document.id)
-                                docRef.update("agscore", aListing.AGScore)
 
+            val lastUser = document.toObject(UserID::class.java)
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            var currentProfile: UserProfile
+            val userRef = viewModel.db.collection("Users").document(currentUser!!.uid)
+            userRef.get()
+                .addOnSuccessListener { document ->
 
-                                val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
-                                val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-                                docRef.update("latitude", apartmentAddress[0].latitude)
-                                docRef.update("longitude", apartmentAddress[0].longitude)
-                                count++
-                            }
+                    if (document != null) {
+                        Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
+                        currentProfile = document.toObject(UserProfile::class.java)!!
+                        val workCoords = geocoder.getFromLocationName(currentProfile.workAddress, 1)
+                        workCoordsString = workCoords[0].latitude.toString() + "," + workCoords[0].longitude.toString()
+
+                        if (currentUser.uid != lastUser!!.userid) {
+                            val listingRef = viewModel.db.collection("listing")
+                            val currentStartTime = currentProfile.workStartHour.toString().plus(currentProfile.workStartMin.toString())
+                            listingRef
+                                .get()
+                                .addOnSuccessListener { result ->
+                                    for (document in result) {
+                                        // Log.d("LISTING", "${document.id} => ${document.data}")
+                                        val aListing = document.toObject(ApartmentListing::class.java)
+                                        val recalcCommute = (currentProfile.workAddress != lastUser.address) ||
+                                                (currentProfile.transportation != lastUser.transportation) ||
+                                                (currentStartTime != lastUser.workStartTime)
+                                        println("address boolean --- " + (currentProfile.workAddress != lastUser.address))
+                                        println("transport boolean --- " + (currentProfile.transportation != lastUser.transportation))
+                                        println("workStart boolean --- " + (currentStartTime != lastUser.workStartTime))
+
+                                        val docRef = viewModel.db.collection("listing").document(document.id)
+                                        docRef.update("agscore", calculateApartmentScore(aListing, recalcCommute))
+
+                                        val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
+                                        val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
+                                        docRef.update("latitude", apartmentAddress[0].latitude)
+                                        docRef.update("longitude", apartmentAddress[0].longitude)
+                                        docRef.update("commuteTime", aListing.commuteTime)
+                                    }
+                                    lastUserIdRef.update("userid", currentUser.uid)
+                                    lastUserIdRef.update("address", currentProfile.workAddress)
+                                    lastUserIdRef.update("transportation", currentProfile.transportation)
+                                    lastUserIdRef.update("workStartTime", currentStartTime)
+                                    //recalcSema.release()
+                                }
+                                .addOnFailureListener { exception ->
+                                    Log.d("LISTING", "Error getting documents: ", exception)
+                                }
+                        } else {
+                            //recalcSema.release()
                         }
-                        lastUserIdRef.update("userid", currentUser)
-                        recalcSema.release()
+                    } else {
+                        Log.d("CLOUD FIRESTORE", "No such document")
                     }
-                    .addOnFailureListener { exception ->
-                        //Log.d("LISTING", "Error getting documents: ", exception)
-                    }
-            } else {
-                recalcSema.release()
-            }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d("CLOUD FIRESTORE", "get failed with ", exception)
+                }
         }
 
         viewModel.populateListings()
@@ -232,7 +264,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // REALTIME DATABSE
 
-        fireInitSema.release()
+        //fireInitSema.release()
 
 
         map.setOnInfoWindowClickListener {
@@ -264,18 +296,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun getListingFromTitle(title: String): ApartmentListing {
-        for (listing in listings) {
-            if (listing.address1 == title) {
-                return listing
-            }
-        }
-        return listings[0]
-    }
 
-
-    fun calculateApartmentScore(listing: ApartmentListing): Int {
-        val userProfile = viewModel.currentUserProfile
+    fun calculateApartmentScore(listing: ApartmentListing, recalcCommute: Boolean): Int {
+        val userProfile = viewModel.currentUserProfile!!
 
         // Component 1: Commute
         var commuteScore = 100
@@ -286,29 +309,30 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         }
         val directionsApi = DirectionsApi.create()
         val directionsRepository = DirectionsRepository(directionsApi)
-        var commuteTimeValue = 0
-        val getCommuteSema = Semaphore(1)
-        getCommuteSema.acquire()
+        var commuteTimeValue = listing.commuteTime
 
-        val fullAddress = listing.address1.substringBefore(" Unit") + ", " + listing.address2
-        val apartmentCoords = geocoder.getFromLocationName(fullAddress, 1)
-        val workCoords = geocoder.getFromLocationName("160 Spear St, San Francisco, CA", 1)
-        val apartmentCoordsString = apartmentCoords[0].latitude.toString() + "," + apartmentCoords[0].longitude.toString()
-        val workCoordsString = workCoords[0].latitude.toString() + "," + workCoords[0].longitude.toString()
+        if (recalcCommute) {
+            /* For efficiency purposes, the directions API is only called if the commute details
+            have changed from last time */
+            val getCommuteSema = Semaphore(1)
+            getCommuteSema.acquire()
+            val apartmentCoordsString = listing.latitude.toString() + "," + listing.longitude.toString()
+            val uiScope = CoroutineScope(Dispatchers.Main + Job())
+            uiScope.launch(
+                context = uiScope.coroutineContext
+                        + Dispatchers.IO) {
+                val callResponse = directionsRepository.getDirections(apartmentCoordsString, workCoordsString, userProfile.transportation, dateToEpoch().toString(), APIKeys.googleMapsAPIKey)
+                val response = callResponse.execute()
+                commuteTimeValue = response.body()!!.routes[0].legs[0].duration.value
+                getCommuteSema.release()
+            }
 
-        val uiScope = CoroutineScope(Dispatchers.Main + Job())
-        uiScope.launch(
-            context = uiScope.coroutineContext
-                    + Dispatchers.IO) {
-            val callResponse = directionsRepository.getDirections(apartmentCoordsString, workCoordsString, userProfile.transportation, dateToEpoch().toString(), APIKeys.googleMapsAPIKey)
-            val response = callResponse.execute()
-            commuteTimeValue = response.body()!!.routes[0].legs[0].duration.value
+            getCommuteSema.acquire()
             getCommuteSema.release()
+            commuteTimeValue /= 60
+            listing.commuteTime = commuteTimeValue
         }
 
-        getCommuteSema.acquire()
-        getCommuteSema.release()
-        commuteTimeValue /= 60
         if (commuteTimeValue > maxCommute) {
             commuteScore -= (commuteTimeValue - maxCommute) * 3
             if (commuteScore < 0) {
@@ -385,12 +409,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
 
     private fun dateToEpoch(): Long {
-        var workStartMinString = viewModel.currentUserProfile.workStartMin.toString()
+        var workStartMinString = viewModel.currentUserProfile!!.workStartMin.toString()
         if (workStartMinString == "0") {
             workStartMinString += "0"
         }
         // add 8 hours to conver to UTC
-        var workStartHourString = (viewModel.currentUserProfile.workStartHour + 8).toString()
+        var workStartHourString = (viewModel.currentUserProfile!!.workStartHour + 8).toString()
 
         //println(" WHAT IS THE STRING ??? " + workStartHourString)
         if (workStartHourString.length == 1) {

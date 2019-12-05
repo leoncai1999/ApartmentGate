@@ -98,13 +98,9 @@ class MainViewModel : ViewModel() {
         listingRef
             .get()
             .addOnSuccessListener { result ->
-                var count = 0
                 for (document in result) {
-                    if (count < 25) { // change as necessary for testing
-                        val aListing = document.toObject(ApartmentListing::class.java)
-                        listings.add(aListing)
-                        count++
-                    }
+                    val aListing = document.toObject(ApartmentListing::class.java)
+                    listings.add(aListing)
                 }
                 apartmentListings.postValue(listings)
             }
@@ -112,7 +108,7 @@ class MainViewModel : ViewModel() {
 
     private fun getSortListingRef(listingRefFiltered: Query): Query {
         when (sortBy) {
-            "Score" -> return listingRefFiltered.orderBy("score", Query.Direction.DESCENDING)
+            "Score" -> return listingRefFiltered.orderBy("agscore", Query.Direction.DESCENDING)
             "Rent low to high" -> return listingRefFiltered.orderBy("rent")
             "Rent high to low" -> return listingRefFiltered.orderBy("rent", Query.Direction.DESCENDING)
             "Size low to high" -> return listingRefFiltered.orderBy("size")
@@ -131,9 +127,6 @@ class MainViewModel : ViewModel() {
         }
         if (minBeds != 0) {
             return db.collection("listing").whereGreaterThanOrEqualTo("beds", minBeds).orderBy("beds")
-        }
-        when (commuteTimeLimit) {
-            "10 min" -> println("Haven't figured this one out yet")
         }
 
         return db.collection("listing")

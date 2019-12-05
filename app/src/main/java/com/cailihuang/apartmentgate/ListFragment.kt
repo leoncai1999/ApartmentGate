@@ -27,7 +27,6 @@ class ListFragment: Fragment() {
     }
 
     private fun initAdapter(root: View) {
-        viewModel.initFirestore()
         val rv = root.findViewById<RecyclerView>(R.id.recyclerViewList)
         listAdapter = ListingAdapter(viewModel)
         rv.adapter = listAdapter

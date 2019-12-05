@@ -21,6 +21,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.content.ContextCompat
 import android.widget.Button
 import kotlinx.android.synthetic.main.user_profile_information.*
+import kotlinx.coroutines.sync.Semaphore
 
 // TODO potentially add nickname
 
@@ -58,54 +59,66 @@ class CreateAccountActivity : AppCompatActivity() {
 
         carButton.setOnClickListener {
             preferredTransport = "driving"
-            changeButtonsColors(carButton, transitButton, walkButton, bikeButton)
+            ViewCompat.setBackgroundTintList(transitButton, ContextCompat.getColorStateList(this, android.R.color.background_light))
+            ViewCompat.setBackgroundTintList(walkButton, ContextCompat.getColorStateList(this, android.R.color.background_light))
+            ViewCompat.setBackgroundTintList(bikeButton, ContextCompat.getColorStateList(this, android.R.color.background_light))
+            //changeButtonsColors(transitButton, walkButton, bikeButton)
             ViewCompat.setBackgroundTintList(carButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         transitButton.setOnClickListener {
             preferredTransport = "transit"
-            changeButtonsColors(transitButton, carButton, walkButton, bikeButton)
+            carButton.setBackground(createProfileButton.background)
+            walkButton.setBackground(createProfileButton.background)
+            bikeButton.setBackground(createProfileButton.background)
+            //changeButtonsColors(carButton, walkButton, bikeButton)
             ViewCompat.setBackgroundTintList(transitButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         walkButton.setOnClickListener {
             preferredTransport = "walking"
-            changeButtonsColors(walkButton, carButton, transitButton, bikeButton)
+            carButton.setBackground(createProfileButton.background)
+            transitButton.setBackground(createProfileButton.background)
+            bikeButton.setBackground(createProfileButton.background)
+            //changeButtonsColors(carButton, transitButton, bikeButton)
             ViewCompat.setBackgroundTintList(walkButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         bikeButton.setOnClickListener {
             preferredTransport = "bicycling"
-            changeButtonsColors(bikeButton, walkButton, carButton, transitButton)
+            carButton.setBackground(createProfileButton.background)
+            walkButton.setBackground(createProfileButton.background)
+            walkButton.setBackground(createProfileButton.background)
+            //changeButtonsColors(walkButton, carButton, transitButton)
             ViewCompat.setBackgroundTintList(bikeButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
         familiesButton.setOnClickListener {
             demographic = "families"
-            changeButtonsColors(familiesButton, professionalsButton, retireesButton)
+            changeButtonsColors(professionalsButton, retireesButton)
             ViewCompat.setBackgroundTintList(familiesButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         professionalsButton.setOnClickListener {
             demographic = "professionals"
-            changeButtonsColors(professionalsButton, familiesButton, retireesButton)
+            changeButtonsColors(familiesButton, retireesButton)
             ViewCompat.setBackgroundTintList(professionalsButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         retireesButton.setOnClickListener {
             demographic = "retirees"
-            changeButtonsColors(retireesButton, familiesButton, professionalsButton)
+            changeButtonsColors(familiesButton, professionalsButton)
             ViewCompat.setBackgroundTintList(retireesButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
         dontCareButton.setOnClickListener {
             walkability = "dontcare"
-            changeButtonsColors(dontCareButton, careButton, careAlotButton)
+            changeButtonsColors(careButton, careAlotButton)
             ViewCompat.setBackgroundTintList(dontCareButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         careButton.setOnClickListener {
             walkability = "care"
-            changeButtonsColors(careButton, dontCareButton, careAlotButton)
+            changeButtonsColors(dontCareButton, careAlotButton)
             ViewCompat.setBackgroundTintList(careButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
         careAlotButton.setOnClickListener {
             walkability = "carealot"
-            changeButtonsColors(careAlotButton, dontCareButton, careButton)
+            changeButtonsColors(dontCareButton, careButton)
             ViewCompat.setBackgroundTintList(careAlotButton, ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark))
         }
 
@@ -121,7 +134,7 @@ class CreateAccountActivity : AppCompatActivity() {
         }
     }
 
-    private fun changeButtonsColors(selectedButton: Button, otherButton1: Button, otherButton2: Button, otherButton3: Button? = null) {
+    private fun changeButtonsColors(otherButton1: Button, otherButton2: Button, otherButton3: Button? = null) {
         otherButton1.setBackground(createProfileButton.background)
         otherButton2.setBackground(createProfileButton.background)
         otherButton3?.setBackground(createProfileButton.background)
