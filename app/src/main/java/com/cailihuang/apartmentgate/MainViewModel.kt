@@ -97,6 +97,8 @@ class MainViewModel : ViewModel() {
         val listingRefFiltered = getFilterListingRef()
         val listingRef = getSortListingRef(listingRefFiltered)
 
+        println("QUERY " + listingRef.toString())
+
         val listings = mutableListOf<ApartmentListing>()
         listingRef
             .get()

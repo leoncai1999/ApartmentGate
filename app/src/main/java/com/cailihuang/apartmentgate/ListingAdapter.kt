@@ -8,10 +8,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.content.Context
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.cailihuang.apartmentgate.api.ApartmentListing
+import kotlinx.android.synthetic.main.marker_listing.view.*
 
 
 class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<ApartmentListing, ListingAdapter.VH>(ApartmentDiff()) {
@@ -60,7 +62,15 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 favView.setImageResource(R.drawable.ic_favorite_black_24dp)
             }
 
-            agScoreTextView.text = item.AGScore.toString()
+            val agScore = item.AGScore
+            if (agScore >= 85) {
+                agScoreTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.chromeGreen))
+            } else if (agScore >= 70) {
+                agScoreTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.chromeYellow))
+            } else {
+                agScoreTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.chromeRed))
+            }
+            agScoreTextView.text = agScore.toString()
 
             nameTextView.setOnClickListener {
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))

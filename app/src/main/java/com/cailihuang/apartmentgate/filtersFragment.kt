@@ -37,30 +37,30 @@ class FiltersFragment: Fragment() {
 
     private fun initializeLayoutElems(root: View) {
 
-        val commuteTimeArrayAdapter = ArrayAdapter.createFromResource(
-            context!!,
-            R.array.commute_array,
-            android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).adapter = adapter
-        }
+//        val commuteTimeArrayAdapter = ArrayAdapter.createFromResource(
+//            context!!,
+//            R.array.commute_array,
+//            android.R.layout.simple_spinner_item
+//        ).also { adapter ->
+//            // Specify the layout to use when the list of choices appears
+//            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//            // Apply the adapter to the spinner
+//            root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).adapter = adapter
+//        }
 
-        root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // do nothing
-            }
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                viewModel.resetFilters()
-                val res: Resources = resources
-                val commuteTimeArray = res.getStringArray(R.array.commute_array)
-                viewModel.commuteTimeLimit = commuteTimeArray[position]
-                viewModel.populateListings()
-            }
-        }
+//        root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+//            override fun onNothingSelected(parent: AdapterView<*>?) {
+//                // do nothing
+//            }
+//
+//            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+//                viewModel.resetFilters()
+//                val res: Resources = resources
+//                val commuteTimeArray = res.getStringArray(R.array.commute_array)
+//                viewModel.commuteTimeLimit = commuteTimeArray[position]
+//                viewModel.populateListings()
+//            }
+//        }
 
         val minSizeArrayAdapter = ArrayAdapter.createFromResource(
             context!!,
@@ -141,12 +141,17 @@ class FiltersFragment: Fragment() {
             }
         }
 
-        root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).setSelection(commuteTimeArrayAdapter.getPosition(viewModel.commuteTimeLimit))
+        //root.findViewById<Spinner>(R.id.maxCommuteTimeSpinner).setSelection(commuteTimeArrayAdapter.getPosition(viewModel.commuteTimeLimit))
         root.findViewById<Spinner>(R.id.maxRentSpinner).setSelection(rentLimitArrayAdapterView.getPosition(viewModel.rentLimit.toString()))
         root.findViewById<Spinner>(R.id.minSizeSpinner).setSelection(minSizeArrayAdapter.getPosition(viewModel.minSize.toString()))
         root.findViewById<Spinner>(R.id.minBedsSpinner).setSelection(minBedsArrayAdapter.getPosition(viewModel.minSize.toString()))
 
         root.findViewById<Button>(R.id.setFiltersButton).setOnClickListener {
+            fragmentManager?.popBackStack()
+        }
+
+        root.findViewById<Button>(R.id.resetFiltersButton).setOnClickListener {
+            viewModel.resetFilters()
             fragmentManager?.popBackStack()
         }
     }

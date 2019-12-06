@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:background="@color/colorPrimary">
+    android:layout_height="match_parent" android:background="@color/gateRed">
 
     <TextView
         android:id="@+id/trendingNeighborhoods"
@@ -11,7 +11,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="Trending Neighborhoods"
-        android:textSize="26dp"
+        android:textSize="24sp"
+        android:fontFamily="@font/poppins_black"
         android:textStyle="bold"
         android:textColor="#FFFFFF"/>
 

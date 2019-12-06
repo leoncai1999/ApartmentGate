@@ -12,6 +12,8 @@
         android:text="Filters"
         android:textStyle="bold"
         android:textSize="24sp"
+        android:fontFamily="@font/poppins_black"
+        android:textColor="@color/dustyBlue"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"/>
@@ -73,6 +75,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"/>
 
+        <!--
+
         <TextView
             android:id="@+id/maxCommuteTimeLabelTV"
             android:layout_width="match_parent"
@@ -87,14 +91,32 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"/>
 
+           -->
+
     </LinearLayout>
 
-    <Button
-        android:id="@+id/setFiltersButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Go Back" />
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/setFiltersButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Go Back" />
+
+        <Button
+            android:id="@+id/resetFiltersButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Reset Filters" />
+
+    </LinearLayout>
+
 
 
 </LinearLayout>

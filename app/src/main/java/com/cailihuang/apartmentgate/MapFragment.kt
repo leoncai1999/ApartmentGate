@@ -247,7 +247,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                 val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                                 map.setInfoWindowAdapter(markerInfoWindow)
                                 val hsv = FloatArray(3)
-                                val markerColor = getColorOfDegradate(Color.parseColor("#0000AB"), Color.parseColor("#E9FAFF"), apartment.AGScore)
+                                val markerColor = getColorOfDegradate(Color.parseColor("#660000"), Color.parseColor("#d90202"), apartment.AGScore)
                                 Color.colorToHSV(markerColor, hsv)
                                 val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
                                     .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(hsv[0])))

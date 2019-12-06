@@ -8,4 +8,6 @@
     <color name="chromeRed">#DB4437</color>
     <color name="chromeBlue">#4285F4</color>
     <color name="dustyBlue">#224761</color>
+    <color name="gateRed">#d10202</color>
+    <color name="black">#000000</color>
 </resources>
