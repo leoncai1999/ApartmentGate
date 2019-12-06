@@ -256,8 +256,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             }
 
                             // crashes if uncommented because currentUserProfile hasn't been initialized
-//            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
-//            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+            //val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
+            map.addMarker(MarkerOptions().position(LatLng(workCoords[0].latitude, workCoords[0].longitude)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)))
                         })
 
 

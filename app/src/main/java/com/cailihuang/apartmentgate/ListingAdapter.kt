@@ -76,7 +76,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
                 (it.context as MainActivity).setFragment(OneListingFragment.newInstance(item))
             }
 
-            favView.setOnClickListener{
+            favView.setOnClickListener {
                 val position = adapterPosition
                 val listing = getItem(position)
                 // Toggle Favorite

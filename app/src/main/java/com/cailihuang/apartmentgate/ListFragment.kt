@@ -111,6 +111,8 @@ class ListFragment: Fragment() {
 
         viewModel.getListings().observe(this, Observer {
             listAdapter.submitList(it)
+
+            //recyclerViewList.smoothScrollToPosition(0)
         })
 
         return root
@@ -121,6 +123,10 @@ class ListFragment: Fragment() {
 
         mapButton.setOnClickListener {
             (activity as MainActivity).setFragment(MapFragment.newInstance())
+        }
+
+        upButton.setOnClickListener {
+            recyclerViewList.smoothScrollToPosition(0)
         }
     }
 
