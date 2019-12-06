@@ -1,270 +1,264 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:orientation="vertical" android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
-
-            <Button
-                android:id="@+id/backButton"
-                android:layout_width="55dp"
-                android:layout_height="45dp"
-                android:drawableTop="@drawable/ic_arrow_back_black_24dp"
-                android:layout_marginStart="16dp" />
-
-            <TextView
-                android:id="@+id/apartmentName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:text="Apartment Name"
-                android:textSize="20dp"
-                android:layout_gravity="center"
-                android:textStyle="bold"
-                android:layout_weight="1"/>
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:id="@+id/actionFavorite"
-                android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_favorite_border_black_24dp"
-                android:layout_weight="0"
-                />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/apartmentAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Apartment Address" />
+        android:id="@+id/topNavigation"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary">
 
         <ImageView
-            android:id="@+id/apartmentImage"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:id="@+id/backButton"
+            android:layout_width="45dp"
+            android:layout_height="30dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:scaleType="centerCrop"
-            android:adjustViewBounds="true"
-            android:src="@drawable/no_image_available" />
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@color/colorPrimary"
+            android:src="@drawable/ic_arrow_back_black_24dp" />
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/apartmentName"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="Apartment Name"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/actionFavorite"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_favorite_border_black_24dp"
+            android:layout_weight="0" />
+
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/topNavigation">
+
+        <LinearLayout android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/apartmentGateScoreText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:textSize="16dp"
-                android:text="ApartmentGate Score:"
-                android:layout_weight="0"/>
-
-            <TextView
-                android:id="@+id/apartmentGateScore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/apartmentCommuteTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Commute Time: " />
-
-        <TextView
-            android:id="@+id/apartmentCommuteFare"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Commute Fare: " />
-
-        <TextView
-            android:id="@+id/commuteDistance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Commute Distance: " />
-
-        <TextView
-            android:id="@+id/durationInTraffic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Duration In Traffic: " />
-
-        <FrameLayout
-            android:id="@+id/apartmentMapFL"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-
-            app:layout_constraintTop_toBottomOf="@id/apartmentCommuteTime"
-            app:layout_constraintBottom_toTopOf="@id/apartmentRent">
-
-            <fragment
-                android:id="@+id/apartmentMapFrag"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:id="@+id/apartmentAddress"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Apartment Address" />
 
-        </FrameLayout>
+            <ImageView
+                android:id="@+id/apartmentImage"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
+                android:src="@drawable/no_image_available" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/directionsRV"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+                <TextView
+                    android:id="@+id/apartmentGateScoreText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:textSize="16dp"
+                    android:text="ApartmentGate Score:"
+                    android:layout_weight="0"/>
+
+                <TextView
+                    android:id="@+id/apartmentGateScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:textSize="16dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/apartmentCommuteTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Commute Time: " />
+
+            <TextView
+                android:id="@+id/apartmentCommuteFare"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Commute Fare: " />
+
+            <TextView
+                android:id="@+id/commuteDistance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Commute Distance: " />
+
+            <TextView
+                android:id="@+id/durationInTraffic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Duration In Traffic: " />
+
+            <FrameLayout
+                android:id="@+id/apartmentMapFL"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
+
+                <fragment
+                    android:id="@+id/apartmentMapFrag"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"/>
+
+            </FrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/directionsRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FAFAFA"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp" />
 
             <TextView
                 android:id="@+id/apartmentRent"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:textSize="16dp"
-                android:text="Rent: "
-                android:layout_weight="1"/>
+                android:text="Rent: " />
 
             <TextView
                 android:id="@+id/apartmentSize"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:textSize="16dp"
-                android:text="Size: "
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+                android:text="Size: "/>
 
             <TextView
                 android:id="@+id/apartmentBedrooms"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:textSize="16dp"
-                android:text="Bedrooms: "
-                android:layout_weight="1"/>
+                android:text="Bedrooms: " />
 
             <TextView
                 android:id="@+id/apartmentBathrooms"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
                 android:textSize="16dp"
                 android:text="Bathrooms: "
-                android:layout_weight="1"/>
+                />
 
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/apartmentNeighborhood"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Neighborhood: " />
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
+            <TextView
+                android:id="@+id/apartmentNeighborhood"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Neighborhood: " />
 
             <TextView
                 android:id="@+id/apartmentWalkScore"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:textSize="16dp"
-                android:text="Walk Score®: "
-                android:layout_weight="1"/>
+                android:text="Walk Score®: " />
 
             <TextView
                 android:id="@+id/apartmentBikeScore"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:textSize="16dp"
-                android:text="Bike Score®: "
-                android:layout_weight="1" />
+                android:text="Bike Score®: " />
+
+            <TextView
+                android:id="@+id/apartmentSoundScore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:textSize="16dp"
+                android:text="Sound Score®: " />
+
+            <TextView
+                android:id="@+id/apartmentDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:textSize="16dp" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/apartmentSoundScore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="16dp"
-            android:text="Sound Score®: " />
+    </androidx.core.widget.NestedScrollView>
 
-        <TextView
-            android:id="@+id/apartmentDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:textSize="16dp" />
-
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+</RelativeLayout>

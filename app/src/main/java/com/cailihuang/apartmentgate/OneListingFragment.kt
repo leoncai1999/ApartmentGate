@@ -77,7 +77,7 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
         val listing = arguments?.getParcelable<ApartmentListing>("listing")
         val fullAddress = listing!!.address1.substringBefore(" Unit") + ", " + listing.address2
 
-        val backButton = rootView.findViewById<TextView>(R.id.backButton)
+        val backButton = rootView.findViewById<ImageView>(R.id.backButton)
         backButton.setOnClickListener {
             if (viewModel.returnToMap) {
                 (activity as MainActivity).setFragment(MapFragment.newInstance())
