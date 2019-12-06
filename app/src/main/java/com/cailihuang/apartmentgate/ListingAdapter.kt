@@ -49,7 +49,7 @@ class ListingAdapter(private val viewModel: MainViewModel) : ListAdapter<Apartme
 
             nameTextView.text = item.address1
             addressTextView.text = fullAddress
-            rentTextView.text =  """${item.rent}/month"""
+            rentTextView.text =  """${item.rent}"""
             bedTextView.text = item.beds.toString()
             if (bedTextView.text == "0") {
                 bedTextView.text = "Studio"
