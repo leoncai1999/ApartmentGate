@@ -83,6 +83,12 @@ class ListFragment: Fragment() {
         viewModel.populateFavorites()
         initializeLayoutElems(root)
 
+        viewModel.getListings().observe(this, Observer {
+            listAdapter.submitList(it)
+
+            //recyclerViewList.smoothScrollToPosition(0)
+        })
+
         // Used to convert Cloud Firestore string fields to Int so that they're sortable
         //convertFirestoreStringToInts()
 
@@ -109,11 +115,7 @@ class ListFragment: Fragment() {
 
         viewModel.populateListings()
 
-        viewModel.getListings().observe(this, Observer {
-            listAdapter.submitList(it)
 
-            //recyclerViewList.smoothScrollToPosition(0)
-        })
 
         return root
     }

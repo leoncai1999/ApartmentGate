@@ -147,6 +147,7 @@ class FiltersFragment: Fragment() {
         root.findViewById<Spinner>(R.id.minBedsSpinner).setSelection(minBedsArrayAdapter.getPosition(viewModel.minSize.toString()))
 
         root.findViewById<Button>(R.id.setFiltersButton).setOnClickListener {
+            viewModel.populateListings()
             fragmentManager?.popBackStack()
         }
 

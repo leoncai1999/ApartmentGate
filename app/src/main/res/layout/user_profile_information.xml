@@ -156,7 +156,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:orientation="horizontal" android:layout_width="match_parent"
+        android:orientation="vertical" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:layout_marginTop="16dp">
 
         <TextView
@@ -170,7 +170,7 @@
 
         <Spinner
             android:id="@+id/commuteTimeSpinner"
-            android:layout_width="250dp"
+            android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textSize="18sp"

@@ -215,13 +215,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                                         docRef.update("agscore", calculateApartmentScore(aListing, recalcCommute))
 
                                         val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
-                                        //try {
+                                        try {
                                             val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
                                             docRef.update("latitude", apartmentAddress[0].latitude)
                                             docRef.update("longitude", apartmentAddress[0].longitude)
-//                                        } catch (e: SomeException) {
-//
-//                                        }
+                                        } catch (e: Exception) {
+                                            Log.d("GEOCODER", "Failed to get apartment coordinates")
+                                        }
 
                                         docRef.update("commuteTime", aListing.commuteTime)
                                     }

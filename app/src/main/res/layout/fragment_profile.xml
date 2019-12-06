@@ -12,7 +12,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Your Profile"
-            android:textSize="28sp"
+            android:textSize="26sp"
+            android:fontFamily="@font/poppins_black"
+            android:textColor="@color/dustyBlue"
             android:gravity="center"
             android:layout_marginTop="16dp"/>
 

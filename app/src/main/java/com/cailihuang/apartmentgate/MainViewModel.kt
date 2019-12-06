@@ -125,12 +125,24 @@ class MainViewModel : ViewModel() {
     }
 
     private fun getFilterListingRef(): Query {
-        if (rentLimit != 0) {
+        if ((rentLimit != 0) && ((sortBy == "Rent low to high") || (sortBy == "Rent high to low"))) {
+            // rent filter and rent sort
+            return db.collection("listing").whereLessThanOrEqualTo("rent", rentLimit)
+        }
+
+        if ((rentLimit != 0)) {
+            // rent filter but no rent sort
             return db.collection("listing").whereLessThanOrEqualTo("rent", rentLimit).orderBy("rent")
         }
-        if (minSize != 0) {
+
+        if ((minSize != 0) && ((sortBy == "Size low to high") || (sortBy == "Size high to low"))) {
+            return db.collection("listing").whereGreaterThanOrEqualTo("size", minSize)
+        }
+
+        if ((minSize != 0)) {
             return db.collection("listing").whereGreaterThanOrEqualTo("size", minSize).orderBy("size")
         }
+
         if (minBeds != 0) {
             return db.collection("listing").whereGreaterThanOrEqualTo("beds", minBeds).orderBy("beds")
         }

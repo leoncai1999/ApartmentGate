@@ -29,6 +29,7 @@ class WelcomeActivity : AppCompatActivity() {
                 var fbAuth = FirebaseAuth.getInstance()
                 fbAuth.signInWithEmailAndPassword(emailET.text.toString(), passwordET.text.toString()).addOnCompleteListener(this, OnCompleteListener<AuthResult> { task ->
                     if (task.isSuccessful) {
+                        Toast.makeText(this, "Please be patient as we calculate your scores.", Toast.LENGTH_LONG).show()
                         val mainActivityIntent = Intent(this, MainActivity::class.java)
                         startActivity(mainActivityIntent)
                     } else {

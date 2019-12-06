@@ -56,7 +56,7 @@ class CreateAccountActivity : AppCompatActivity() {
     private fun initializeFirebase() {
         auth = FirebaseAuth.getInstance()
         viewModel = MainViewModel()
-        viewModel.initFirestore()
+        viewModel.db = FirebaseFirestore.getInstance()
     }
 
     private fun initializeLayoutElems() {
@@ -193,8 +193,6 @@ class CreateAccountActivity : AppCompatActivity() {
     }
 
     private fun createNewAccount() {
-        // TODO check if fields are empty
-        // TODO confirm password
 
         val email = newEmailET.text.toString()
         val password = newPasswordET.text.toString()
@@ -202,7 +200,7 @@ class CreateAccountActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
                 val user = auth.getCurrentUser()
-                Toast.makeText(this, "New user email: " + user?.email, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "New user email: " + user?.email + "\nPlease be patient as we calculate your scores.", Toast.LENGTH_LONG).show()
 
                 var newUser = UserProfile()
 
