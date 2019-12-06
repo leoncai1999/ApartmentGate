@@ -76,7 +76,8 @@
                     android:id="@+id/rentTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
                     android:gravity="center" />
             </LinearLayout>
 
@@ -86,7 +87,7 @@
                 android:layout_weight="2">
 
                 <ImageView
-                    android:id="@+id/comments_icon"
+                    android:id="@+id/beds_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="12dp"
@@ -96,7 +97,7 @@
                     android:id="@+id/bedTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="12dp"
+                    android:layout_marginTop="12dp"
                     android:gravity="center" />
             </LinearLayout>
 
