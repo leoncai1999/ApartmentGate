@@ -4,19 +4,12 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/newEmailET"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:hint="Email"></EditText>
-
-    <EditText
         android:id="@+id/newPasswordET"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
+        android:inputType="textPassword"
         android:hint="Password"></EditText>
 
     <EditText
@@ -25,6 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
+        android:inputType="textPassword"
         android:hint="Confirm Password"></EditText>
 
     <EditText
@@ -91,54 +85,73 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"/>
 
+    <Spinner
+        android:id="@+id/transportationSpinner"
+        android:layout_width="240dp"
+        android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="12dp"/>
+
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/carButton"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:drawableTop="@drawable/ic_directions_car_black_24dp"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"/>
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/transitButtons"
+            android:orientation="horizontal">
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            <!--
 
-        <Button
-            android:id="@+id/transitButton"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:drawableTop="@drawable/ic_directions_transit_black_24dp"
-            android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/carButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:drawableTop="@drawable/ic_directions_car_black_24dp"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"/>
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
-        <Button
-            android:id="@+id/walkButton"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:drawableTop="@drawable/ic_directions_walk_black_24dp"
-            android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/transitButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:drawableTop="@drawable/ic_directions_transit_black_24dp"
+                android:layout_weight="1"/>
 
-        <View
-            android:layout_width="1dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
 
-        <Button
-            android:id="@+id/bikeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:drawableTop="@drawable/ic_directions_bike_black_24dp"
-            android:layout_marginEnd="16dp"
-            android:layout_weight="1"/>
+            <RadioButton
+                android:id="@+id/walkButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:drawableTop="@drawable/ic_directions_walk_black_24dp"
+                android:layout_weight="1"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <RadioButton
+                android:id="@+id/bikeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:drawableTop="@drawable/ic_directions_bike_black_24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_weight="1"/>
+            -->
+
+        </RadioGroup>
 
     </LinearLayout>
 
@@ -160,7 +173,9 @@
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="16dp"/>
+            android:textSize="18sp"
+            android:layout_marginEnd="16dp"
+            android:layout_margin="12dp"/>
 
     </LinearLayout>
 
@@ -172,6 +187,16 @@
         android:textSize="18sp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"/>
+
+    <Spinner
+        android:id="@+id/demographicSpinner"
+        android:layout_width="240dp"
+        android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="12dp"/>
+
+    <!--
 
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
@@ -212,6 +237,8 @@
 
     </LinearLayout>
 
+    -->
+
     <TextView
         android:id="@+id/walkabilityText"
         android:layout_width="match_parent"
@@ -220,6 +247,16 @@
         android:textSize="18sp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"/>
+
+    <Spinner
+        android:id="@+id/walkabilitySpinner"
+        android:layout_width="240dp"
+        android:textSize="18sp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="12dp"/>
+
+    <!--
 
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
@@ -259,6 +296,8 @@
             android:layout_weight="1"/>
 
     </LinearLayout>
+
+    -->
 
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"

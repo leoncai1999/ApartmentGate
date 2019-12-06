@@ -71,6 +71,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private var fireInitSema = Semaphore(1)
     private var recalcSema = Semaphore(1)
+    private var recalcBool = false
 
     // Right now, all of the commute times must be retrieved before you launch the list
 
@@ -102,9 +103,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFrag) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
         geocoder = Geocoder(activity, Locale.getDefault())
-
-
-
 
         return rootView
     }
@@ -179,7 +177,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         // Set the ApartmentGate score for each listing
 
-        //recalcSema.acquire()
+        recalcSema.acquire()
 
         val lastUserIdRef = viewModel.db.collection("LastUser").document("lastuser")
         lastUserIdRef.get().addOnSuccessListener { document ->
@@ -204,37 +202,65 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                             listingRef
                                 .get()
                                 .addOnSuccessListener { result ->
+                                    var count = 0
                                     for (document in result) {
+                                        count++
                                         // Log.d("LISTING", "${document.id} => ${document.data}")
                                         val aListing = document.toObject(ApartmentListing::class.java)
                                         val recalcCommute = (currentProfile.workAddress != lastUser.address) ||
                                                 (currentProfile.transportation != lastUser.transportation) ||
                                                 (currentStartTime != lastUser.workStartTime)
-                                        println("address boolean --- " + (currentProfile.workAddress != lastUser.address))
-                                        println("transport boolean --- " + (currentProfile.transportation != lastUser.transportation))
-                                        println("workStart boolean --- " + (currentStartTime != lastUser.workStartTime))
 
                                         val docRef = viewModel.db.collection("listing").document(document.id)
                                         docRef.update("agscore", calculateApartmentScore(aListing, recalcCommute))
 
                                         val fullAddress = aListing.address1.substringBefore(" Unit") + ", " + aListing.address2
-                                        val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
-                                        docRef.update("latitude", apartmentAddress[0].latitude)
-                                        docRef.update("longitude", apartmentAddress[0].longitude)
+                                        //try {
+                                            val apartmentAddress = geocoder.getFromLocationName(fullAddress, 1)
+                                            docRef.update("latitude", apartmentAddress[0].latitude)
+                                            docRef.update("longitude", apartmentAddress[0].longitude)
+//                                        } catch (e: SomeException) {
+//
+//                                        }
+
                                         docRef.update("commuteTime", aListing.commuteTime)
                                     }
                                     lastUserIdRef.update("userid", currentUser.uid)
                                     lastUserIdRef.update("address", currentProfile.workAddress)
                                     lastUserIdRef.update("transportation", currentProfile.transportation)
                                     lastUserIdRef.update("workStartTime", currentStartTime)
-                                    //recalcSema.release()
+
+                                    recalcSema.release()
                                 }
                                 .addOnFailureListener { exception ->
                                     Log.d("LISTING", "Error getting documents: ", exception)
                                 }
                         } else {
-                            //recalcSema.release()
+                            recalcSema.release()
                         }
+                        recalcBool = true
+
+
+                        viewModel.getListings().observe(this, Observer { apartments ->
+                            for (i in 0 until apartments.size) {
+                                val apartment = apartments[i]
+                                val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+                                map.setInfoWindowAdapter(markerInfoWindow)
+                                val hsv = FloatArray(3)
+                                val markerColor = getColorOfDegradate(Color.parseColor("#0000AB"), Color.parseColor("#E9FAFF"), apartment.AGScore)
+                                Color.colorToHSV(markerColor, hsv)
+                                val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
+                                    .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(hsv[0])))
+                                marker.tag = apartment
+                                marker.showInfoWindow()
+                            }
+
+                            // crashes if uncommented because currentUserProfile hasn't been initialized
+//            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
+//            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+                        })
+
+
                     } else {
                         Log.d("CLOUD FIRESTORE", "No such document")
                     }
@@ -249,24 +275,28 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 //        recalcSema.acquire()
 //        recalcSema.release()
 
-        viewModel.getListings().observe(this, Observer { apartments ->
-            for (i in 0 until apartments.size) {
-                val apartment = apartments[i]
-                val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
-                map.setInfoWindowAdapter(markerInfoWindow)
-                val hsv = FloatArray(3)
-                val markerColor = getColorOfDegradate(Color.parseColor("#0000AB"), Color.parseColor("#E9FAFF"), apartment.AGScore)
-                Color.colorToHSV(markerColor, hsv)
-                val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
-                        .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(hsv[0])))
-                marker.tag = apartment
-                marker.showInfoWindow()
-            }
+//        while (!recalcBool) {
+//            println("waiting")
+//        }
 
-            // crashes if uncommented because currentUserProfile hasn't been initialized
-//            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
-//            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
-        })
+//        viewModel.getListings().observe(this, Observer { apartments ->
+//            for (i in 0 until apartments.size) {
+//                val apartment = apartments[i]
+//                val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
+//                map.setInfoWindowAdapter(markerInfoWindow)
+//                val hsv = FloatArray(3)
+//                val markerColor = getColorOfDegradate(Color.parseColor("#0000AB"), Color.parseColor("#E9FAFF"), apartment.AGScore)
+//                Color.colorToHSV(markerColor, hsv)
+//                val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
+//                        .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(hsv[0])))
+//                marker.tag = apartment
+//                marker.showInfoWindow()
+//            }
+//
+//            // crashes if uncommented because currentUserProfile hasn't been initialized
+////            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
+////            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
+//        })
 
         // REALTIME DATABSE
 

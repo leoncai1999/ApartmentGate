@@ -7,6 +7,22 @@
         <item>45 min</item>
         <item>1 hour</item>
     </string-array>
+    <string-array name="transportation_array">
+        <item>Driving</item>
+        <item>Transit</item>
+        <item>Walking</item>
+        <item>Bicycling</item>
+    </string-array>
+    <string-array name="demographic_array">
+        <item>Families</item>
+        <item>Professionals</item>
+        <item>Retirees</item>
+    </string-array>
+    <string-array name="walkability_array">
+        <item>Don\'t care</item>
+        <item>Care</item>
+        <item>Care a lot</item>
+    </string-array>
     <string-array name="sort_by_array">
         <item>Score</item>
         <item>Rent low to high</item>
