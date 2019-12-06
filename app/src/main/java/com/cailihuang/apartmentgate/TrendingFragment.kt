@@ -43,7 +43,6 @@ class TrendingFragment: Fragment() {
         initAdapter(root)
         viewModel.populateNeighborhoods()
         viewModel.getNeighborhoods().observe(this, Observer {
-            println("list to submit is: " + it.toString())
             trendingAdapter.submitList(it)
         })
 

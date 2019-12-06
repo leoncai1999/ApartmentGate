@@ -1,7 +1,9 @@
 package com.cailihuang.apartmentgate
 
 import android.Manifest
+import android.animation.ArgbEvaluator
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
@@ -37,6 +39,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.cailihuang.apartmentgate.api.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.material.animation.ArgbEvaluatorCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.gson.annotations.SerializedName
@@ -110,6 +113,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
 
         listButton.setOnClickListener {
+            viewModel.returnToMap = false
             (activity as MainActivity).setFragment(ListFragment.newInstance())
         }
     }
@@ -190,6 +194,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     if (document != null) {
                         Log.d("CLOUD FIRESTORE", "DocumentSnapshot data: ${document.data}")
                         currentProfile = document.toObject(UserProfile::class.java)!!
+                        // grpc crash may occur here. Work address from current profile is valid though
                         val workCoords = geocoder.getFromLocationName(currentProfile.workAddress, 1)
                         workCoordsString = workCoords[0].latitude.toString() + "," + workCoords[0].longitude.toString()
 
@@ -246,18 +251,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
         viewModel.getListings().observe(this, Observer { apartments ->
             for (i in 0 until apartments.size) {
-
                 val apartment = apartments[i]
-                val fullAddress = apartments[i].address1.substringBefore(" Unit") + ", " + apartments[i].address2
-
                 val markerInfoWindow = MarkerInfoWindowAdapter(activity!!)
                 map.setInfoWindowAdapter(markerInfoWindow)
+                val hsv = FloatArray(3)
+                val markerColor = getColorOfDegradate(Color.parseColor("#0000AB"), Color.parseColor("#E9FAFF"), apartment.AGScore)
+                Color.colorToHSV(markerColor, hsv)
                 val marker = map.addMarker(MarkerOptions().position(LatLng(apartment.latitude, apartment.longitude))
-                        .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
+                        .title(apartment.address1).icon(BitmapDescriptorFactory.defaultMarker(hsv[0])))
                 marker.tag = apartment
                 marker.showInfoWindow()
-
             }
+
+            // crashes if uncommented because currentUserProfile hasn't been initialized
 //            val workAddress = geocoder.getFromLocationName(viewModel.currentUserProfile.workAddress, 1)
 //            map.addMarker(MarkerOptions().position(LatLng(workAddress[0].latitude, workAddress[0].longitude)))
         })
@@ -278,10 +284,23 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
                         apartmentListing = document.toObject(ApartmentListing::class.java)
+                        viewModel.returnToMap = true
                         (activity as MainActivity).setFragment(OneListingFragment.newInstance(apartmentListing))
                     }
                 }
         }
+    }
+
+    fun getColorOfDegradate(colorStart: Int, colorEnd: Int, percent: Int): Int {
+        return Color.rgb(
+                getColorOfDegradateCalculation(Color.red(colorStart), Color.red(colorEnd), percent),
+                getColorOfDegradateCalculation(Color.green(colorStart), Color.green(colorEnd), percent),
+                getColorOfDegradateCalculation(Color.blue(colorStart), Color.blue(colorEnd), percent)
+        )
+    }
+
+    private fun getColorOfDegradateCalculation(colorStart: Int, colorEnd: Int, percent: Int): Int {
+        return (Math.min(colorStart, colorEnd) * (100 - percent) + Math.max(colorStart, colorEnd) * percent) / 100
     }
 
     // keeping around in case grpc is still a dud

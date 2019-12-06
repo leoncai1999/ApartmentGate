@@ -73,6 +73,8 @@ class MainViewModel : ViewModel() {
         value = mutableListOf()
     }
 
+    var returnToMap = false
+
     private val walkScoreApi = WalkScoreApi.create()
     private val walkScoreRepository = WalkScoreRepository(walkScoreApi)
     private var currentWalkScore = MutableLiveData<WalkScore>()
@@ -89,6 +91,7 @@ class MainViewModel : ViewModel() {
     private var currentDirections = MutableLiveData<List<DirectionsApi.Steps>>()
     private var currentDistance = MutableLiveData<String>()
     private var currentDurationInTraffic = MutableLiveData<String>()
+
 
     fun populateListings() {
         val listingRefFiltered = getFilterListingRef()
@@ -329,11 +332,16 @@ class MainViewModel : ViewModel() {
             } else {
                 /* Scenario where the the neighborhood hasn't previously being seen in a
                 favorited listing before */
+                val imageURL = "https://maps.googleapis.com/maps/api/streetview?size=600x300&location="
+                        .plus(listing.latitude.toString()).plus(",%20")
+                        .plus(listing.longitude.toString())
+                        .plus("&fov=100&heading=70&pitch=0&key=")
+                        .plus(APIKeys.googleMapsAPIKey)
                 val neighborhoodData = hashMapOf(
                         "average_rent" to listing.rent,
                         "favorites" to 1,
                         // TODO: Find a way to get unique images for each neighborhood
-                        "image_url" to "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/San_Francisco_%285222422754%29_%282%29.jpg/640px-San_Francisco_%285222422754%29_%282%29.jpg?1575182093536",
+                        "image_url" to imageURL,
                         "name" to listing.neighborhood
                 )
                 neighborhoodRef.set(neighborhoodData)

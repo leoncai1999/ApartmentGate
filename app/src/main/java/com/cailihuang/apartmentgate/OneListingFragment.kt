@@ -79,8 +79,11 @@ class OneListingFragment : Fragment(), OnMapReadyCallback {
 
         val backButton = rootView.findViewById<TextView>(R.id.backButton)
         backButton.setOnClickListener {
-            println("HOW MANY BACK STACK ENTRIES ??? " + (activity as MainActivity).supportFragmentManager.backStackEntryCount)
-            (activity as MainActivity).supportFragmentManager.popBackStackImmediate()
+            if (viewModel.returnToMap) {
+                (activity as MainActivity).setFragment(MapFragment.newInstance())
+            } else {
+                (activity as MainActivity).supportFragmentManager.popBackStack()
+            }
         }
 
         val favoriteButton = rootView.findViewById<ImageView>(R.id.actionFavorite)

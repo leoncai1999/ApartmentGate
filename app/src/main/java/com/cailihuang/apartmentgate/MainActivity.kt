@@ -50,16 +50,4 @@ class MainActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
     }
-
-    fun addFragment(fragment: Fragment) {
-        supportFragmentManager
-            .beginTransaction()
-            .add(R.id.main_frame, fragment)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    fun popBackStack() {
-        supportFragmentManager.popBackStack()
-    }
 }
