@@ -5,7 +5,7 @@ apartment size, and preferred atmosphere, and uses this profile information to g
 on how closely they fit the user's criteria. The user's preferences can be changed anytime, and the grades of
 apartment listings will be recomputed accordingly. In addition, the app uses information from all users to
 show information regarding the most popular neighborhoods in San Francisco, and the average rent paid for
-listings in those neighborhoods.
+listings in those neighborhoods. To learn more about this project, see the writeup: https://docs.google.com/document/d/1ayQ5g0qbl4OtGOBDV0ITrwSb7HU9cpAF2meZeHnpJ0Q/edit?usp=sharing
 
 ## Screenshots
 [![MapView](https://i.postimg.cc/5QXWDLmY/Screenshot-20191206-090910.png)](https://postimg.cc/5QXWDLmY)
